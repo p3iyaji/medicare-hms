@@ -1,0 +1,157 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Spatie\Permission\Traits\HasRoles;
+use Carbon\Carbon;
+
+/**
+ * @property Carbon|null $date_of_birth
+ */
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'uuid',
+        'email',
+        'phone',
+        'password',
+        'user_type',
+        'first_name', 
+        'last_name',
+        'date_of_birth',
+        'gender',
+        'profile_image',
+        'is_verified',
+        'is_active',
+        'last_login_at',
+        'mfa_enabled',
+        'email_verified_at',
+        'phone_verified_at'
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $appends = ['name', 'full_name', 'initials'];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',  
+            'password' => 'hashed',
+            'last_login_at' => 'datetime',
+            'date_of_birth' => 'date',
+            'is_verified' => 'boolean',
+            'is_active' => 'boolean',
+            'mfa_enabled' => 'boolean',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'deleted_at' => 'datetime'
+        ];
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->uuid)) {
+                $user->uuid = \Illuminate\Support\Str::uuid()->toString();
+            }
+        });
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    public function specializations()
+    {
+        return $this->belongsToMany(Specialization::class, 'user_specializations')  
+            ->withPivot('years_of_experience', 'certification_number')
+            ->withTimestamps();
+    }
+
+    public function loginAttempts()
+    {
+        return $this->hasMany(LoginAttempt::class);
+    }
+
+    public function primaryPhysician()
+    {
+        return $this->belongsTo(User::class, 'primary_physician_id');
+    }
+
+    public function patients()
+    {
+        return $this->hasMany(UserProfile::class, 'primary_physician_id');
+    }
+
+    // Proper attribute getter
+    public function getFullNameAttribute(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
+    // getNameAttribute for compatibility
+    public function getNameAttribute(): string
+    {
+        return $this->full_name;
+    }
+
+    // Add initials attribute
+    public function getInitialsAttribute(): string
+    {
+        $initials = '';
+        if ($this->first_name) {
+            $initials .= strtoupper(substr($this->first_name, 0, 1));
+        }
+        if ($this->last_name) {
+            $initials .= strtoupper(substr($this->last_name, 0, 1));
+        }
+        return $initials ?: 'U';
+    }
+
+    // Scopes
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeVerified($query)
+    {
+        return $query->where('is_verified', true);
+    }
+
+    public function scopeByType($query, $type)
+    {
+        return $query->where('user_type', $type);
+    }
+}
