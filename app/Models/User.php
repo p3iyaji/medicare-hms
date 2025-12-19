@@ -30,6 +30,7 @@ class User extends Authenticatable
         'password',
         'user_type',
         'first_name', 
+        'middle_name',
         'last_name',
         'date_of_birth',
         'gender',
@@ -66,7 +67,7 @@ class User extends Authenticatable
             'phone_verified_at' => 'datetime',  
             'password' => 'hashed',
             'last_login_at' => 'datetime',
-            'date_of_birth' => 'date',
+            'date_of_birth' => 'date:Y-m-d',
             'is_verified' => 'boolean',
             'is_active' => 'boolean',
             'mfa_enabled' => 'boolean',
@@ -117,7 +118,7 @@ class User extends Authenticatable
     // Proper attribute getter
     public function getFullNameAttribute(): string
     {
-        return trim($this->first_name . ' ' . $this->last_name);
+        return trim($this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name);
     }
 
     // getNameAttribute for compatibility
@@ -133,6 +134,10 @@ class User extends Authenticatable
         if ($this->first_name) {
             $initials .= strtoupper(substr($this->first_name, 0, 1));
         }
+        if ($this->middle_name) {
+            $initials .= strtoupper(substr($this->middle_name, 0,1));   
+        }
+
         if ($this->last_name) {
             $initials .= strtoupper(substr($this->last_name, 0, 1));
         }

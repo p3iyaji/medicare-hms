@@ -16,7 +16,7 @@ const form = useForm({
 });
 
 const updatePassword = () => {
-    form.put(route('password.update'), {
+    form.put('password', {
         preserveScroll: true,
         onSuccess: () => form.reset(),
         onError: () => {
@@ -113,8 +113,8 @@ const updatePassword = () => {
                         v-if="form.recentlySuccessful"
                         class="text-sm text-gray-600"
                     >
-                        Saved.
-                    </p>
+                       <span class="text-white bg-green-400 p-1 rounded-full"> Saved successfully</span>
+                                        </p>
                 </Transition>
             </div>
         </form>

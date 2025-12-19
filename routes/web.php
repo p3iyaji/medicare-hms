@@ -23,7 +23,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/phone', [ProfileController::class, 'phone'] )->name('profile.phone.update');
     Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
+    Route::delete('/profile/photo', [ProfileController::class, 'deletePhoto'])->name('profile.photo.destroy');
+    Route::put('/medical-update', [ProfileController::class, 'updateMedical']);
+    Route::put('/emergencycontact-update', [ProfileController::class, 'updateEmergencyContact']);
+    Route::put('insuranceinfo-update', [ProfileController::class, 'insuranceInfoUpdate']);
     
     // Appointments
     Route::get('/appointments', function () {

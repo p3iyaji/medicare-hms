@@ -16,7 +16,7 @@ class UserProfile extends Model
         'height',
         'weight',
         'emergency_contact_name',
-        'emergency_contact_phone',
+        'emergency_contact_number',
         'emergency_contact_relationship',
         'primary_physician_id',
         'insurance_provider',

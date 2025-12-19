@@ -311,7 +311,7 @@ const submit = () => {
         <footer class="relative z-10 py-4">
             <div class="max-w-7xl mx-auto px-4">
                 <p class="text-center text-xs text-gray-500">
-                    &copy; 2024 MediCare Pro. For authorized medical professionals only.
+                    &copy; 2026 MediCare Pro. For authorized medical professionals only.
                 </p>
             </div>
         </footer>

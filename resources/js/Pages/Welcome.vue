@@ -75,7 +75,7 @@
                 <div class="mt-10 max-w-md mx-auto sm:flex sm:justify-center md:mt-12">
                     <div class="rounded-md shadow">
                         <a href="/register" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10">
-                            Start Free Trial
+                            Start here!
                             <svg class="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
@@ -371,7 +371,7 @@
                 
                 <div class="mt-12 border-t border-gray-700 pt-8">
                     <p class="text-base text-gray-400 text-center">
-                        &copy; 2024 MediCare Pro. All rights reserved. HIPAA compliant. Patient data secured.
+                        &copy; 2026 MediCare Pro. All rights reserved. HIPAA compliant. Patient data secured.
                     </p>
                 </div>
             </div>
