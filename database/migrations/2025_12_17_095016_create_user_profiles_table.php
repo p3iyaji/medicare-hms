@@ -23,12 +23,16 @@ return new class extends Migration
                 'A+','A-','B+','B-','AB+','AB-','O+','O-'
             ])->nullable();
 
+            $table->enum('genotype', ['AA', 'AS', 'AC', 'SS', 'SC', 'CC'])->nullable();
+
             $table->decimal('height', 5, 2)->nullable()->comment('Height in cm');
             $table->decimal('weight', 5, 2)->nullable()->comment('Weight in kg');
 
             $table->string('emergency_contact_name', 200)->nullable();
             $table->string('emergency_contact_number', 20)->nullable();
             $table->string('emergency_contact_relationship', 100)->nullable();
+            $table->longText('emergency_contact_address')->nullable();
+            $table->boolean('same_as_users_address')->nullable();
 
             $table->foreignId('primary_physician_id')
                 ->nullable()

@@ -13,11 +13,14 @@ class UserProfile extends Model
     protected $fillable = [
         'user_id',
         'blood_type',
+        'genotype', 
         'height',
         'weight',
         'emergency_contact_name',
         'emergency_contact_number',
         'emergency_contact_relationship',
+        'emergency_contact_address', 
+        'same_as_users_address', 
         'primary_physician_id',
         'insurance_provider',
         'insurance_policy_number',
@@ -28,6 +31,7 @@ class UserProfile extends Model
     protected $casts = [
         'height' => 'decimal:2',
         'weight' => 'decimal:2',
+        'same_as_users_address' => 'boolean', 
         'allergies' => 'array',
         'chronic_conditions' => 'array',
         'created_at' => 'datetime',
@@ -43,4 +47,13 @@ class UserProfile extends Model
     {
         return $this->belongsTo(User::class, 'primary_physician_id');
     }
+
+    public function getEmergencyAddressAttribute()
+{
+    if ($this->same_as_users_address && $this->user) {
+        return $this->user->address; // Assuming user has an address field
+    }
+    
+    return $this->emergency_contact_address;
+}
 }

@@ -1,5 +1,4 @@
 <script setup>
-import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
@@ -180,26 +179,27 @@ const submit = () => {
                                 <InputError class="mt-1 text-xs" :message="form.errors.phone" />
                             </div>
 
-                            <!-- User Type -->
-                            <div>
-                                <InputLabel for="user_type" value="Professional Role" class="block text-sm font-medium text-gray-700 mb-1" />
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
-                                    </div>
-                                    <select 
-                                        id="user_type" 
-                                        v-model="form.user_type"
-                                        class="pl-10 w-full border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white"
-                                    >
-                                        <option value="" disabled selected>Select your professional role</option>
-                                        <option v-for="(label, value) in userTypes" :key="value" :value="value">{{ label }}</option>
-                                    </select>
-                                </div>
-                                <InputError class="mt-1 text-xs" :message="form.errors.user_type" />
-                            </div>
+                           <!-- User Type - Hidden field for patient -->
+<div class="hidden">
+    <input type="hidden" id="user_type" v-model="form.user_type" value="patient" />
+</div>
+
+<!-- Optional: Show display text instead of dropdown -->
+<div>
+    <InputLabel for="user_type_display" value="Account Type" class="block text-sm font-medium text-gray-700 mb-1" />
+    <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+        </div>
+        <div class="pl-10 w-full border border-gray-300 rounded-lg bg-gray-50 px-3 py-2.5 text-gray-700">
+            <span class="font-medium">Patient Account</span>
+            <span class="text-sm text-gray-500 ml-2">(Standard medical profile)</span>
+        </div>
+    </div>
+    <p class="mt-1 text-xs text-gray-500">All new registrations are created as Patient accounts</p>
+</div>
 
                             <!-- Two-column layout for passwords -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">

@@ -39,13 +39,13 @@ const profileCompletion = computed(() => {
     
     // Default calculation
     let completion = 0;
-    const totalFields = 15;
+    const totalFields = 16;
     
     const userFields = ['first_name', 'last_name', 'email', 'phone', 'date_of_birth', 'gender', 'user_type'];
     const completedUserFields = userFields.filter(field => props.user[field] && props.user[field].toString().trim() !== '').length;
     
     const profileFields = ['blood_type', 'height', 'weight', 'emergency_contact_name', 
-                           'emergency_contact_phone', 'insurance_provider', 'insurance_policy_number'];
+                           'emergency_contact_phone', 'insurance_provider', 'insurance_policy_number', 'allergies', 'chronic_conditions'];
     const completedProfileFields = profileFields.filter(field => props.profile[field] && props.profile[field].toString().trim() !== '').length;
     
     const hasProfileImage = props.user.profile_image ? 1 : 0;
@@ -311,6 +311,10 @@ defineExpose({
             <p>Max file size: 5MB</p>
             <p>Recommended size: 500x500 pixels</p>
         </div>
+        <div class="space-y-4"></div>
+       <div class="space-y-4">
+        
+       </div>
     </div>
 </template>
 

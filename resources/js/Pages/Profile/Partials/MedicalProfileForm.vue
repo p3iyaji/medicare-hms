@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { usePage, useForm, router } from '@inertiajs/vue3';
 import TextInput from '@/Components/TextInput.vue';
 
 const props = defineProps({
@@ -15,6 +15,8 @@ const props = defineProps({
     }
 });
 
+const bloodtypes = usePage().props.bloodtypes;
+const genotypes = usePage().props.genotypes;
 const emit = defineEmits(['updated']);
 
 const isEditing = ref(false);
@@ -22,6 +24,7 @@ const isEditing = ref(false);
 // Initialize form with profile data
 const form = useForm({
     blood_type: props.profile.blood_type || '',
+    genotype: props.profile.genotype || '',
     height: props.profile.height || '',
     weight: props.profile.weight || '',
     primary_physician_id: props.profile.primary_physician_id || '',
@@ -34,6 +37,7 @@ const startEditing = () => {
     isEditing.value = true;
     // Reset form with current profile data
     form.blood_type = props.profile.blood_type || '';
+    form.genotype = props.profile.genotype || '';
     form.height = props.profile.height || '';
     form.weight = props.profile.weight || '';
     form.primary_physician_id = props.profile.primary_physician_id || '';
@@ -124,18 +128,28 @@ const submitForm = () => {
                             :class="{ 'border-red-300': form.errors.blood_type }"
                         >
                             <option value="">Select Blood Type</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
+                            <option v-for="(label, value) in bloodtypes" :key="value" :value="value">
+                                {{ label }}
+                            </option>
                         </select>
                         <p v-if="form.errors.blood_type" class="mt-1 text-sm text-red-600">
                             {{ form.errors.blood_type }}
                         </p>
+                    </div>
+                    <div>
+                        <InputLabel for="genotype" value="Genotype" />
+
+                        <select 
+                            id="genotype"
+                            v-model="form.genotype"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            :class="{ 'border-red-300': form.errors.genotype }"
+                         >
+                            <option value="">Select Genotype</option>
+                            <option v-for="(label, value) in genotypes" :key="value" :value="value">
+                                {{ label }}
+                            </option>
+                        </select>   
                     </div>
                     
                     <!-- Height and Weight -->
@@ -277,7 +291,12 @@ Asthma"
                         </div>
                     </div>
                 </div>
-                
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Genotype</label>
+                    <div class="flex items-center">
+                        <div class="text-2xl font-bold text-gray-900">{{ profile.genotype || 'Not set' }}</div>
+                    </div>
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Height</label>

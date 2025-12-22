@@ -29,12 +29,25 @@ class User extends Authenticatable
         'phone',
         'password',
         'user_type',
+        'title',
         'first_name', 
         'middle_name',
         'last_name',
         'date_of_birth',
         'gender',
         'profile_image',
+        'nationality_id',
+        'state_id',
+        'occupation',
+        'work_address',
+        'industry',
+        'ethinic_region_id',
+        'spoken_languages',
+        'religion',
+        'region',
+        'county',
+        'district',
+        'residential_address',
         'is_verified',
         'is_active',
         'last_login_at',
@@ -53,7 +66,7 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected $appends = ['name', 'full_name', 'initials'];
+    protected $appends = ['name', 'full_name', 'initials', 'age'];
 
     /**
      * Get the attributes that should be cast.
@@ -73,7 +86,8 @@ class User extends Authenticatable
             'mfa_enabled' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
-            'deleted_at' => 'datetime'
+            'deleted_at' => 'datetime',
+            'spoken_languages' => 'array', 
         ];
     }
 
@@ -86,6 +100,22 @@ class User extends Authenticatable
                 $user->uuid = \Illuminate\Support\Str::uuid()->toString();
             }
         });
+    }
+
+    // Relationships
+    public function nationality()
+    {
+        return $this->belongsTo(Nationality::class, 'nationality_id');
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class, 'state_id');
+    }
+
+    public function ethnicRegion()
+    {
+        return $this->belongsTo(EthnicRegion::class, 'ethinic_region_id');
     }
 
     public function profile()
@@ -135,13 +165,36 @@ class User extends Authenticatable
             $initials .= strtoupper(substr($this->first_name, 0, 1));
         }
         if ($this->middle_name) {
-            $initials .= strtoupper(substr($this->middle_name, 0,1));   
+            $initials .= strtoupper(substr($this->middle_name, 0, 1));   
         }
 
         if ($this->last_name) {
             $initials .= strtoupper(substr($this->last_name, 0, 1));
         }
         return $initials ?: 'U';
+    }
+
+    // Add formatted title with name attribute
+    public function getFormalNameAttribute(): string
+    {
+        $parts = [];
+        if ($this->title) {
+            $parts[] = $this->title;
+        }
+        if ($this->first_name) {
+            $parts[] = $this->first_name;
+        }
+        if ($this->last_name) {
+            $parts[] = $this->last_name;
+        }
+        
+        return implode(' ', $parts) ?: 'User';
+    }
+
+    // Calculate age from date_of_birth
+    public function getAgeAttribute(): ?int
+    {
+        return $this->date_of_birth ? $this->date_of_birth->age : null;
     }
 
     // Scopes
@@ -158,5 +211,55 @@ class User extends Authenticatable
     public function scopeByType($query, $type)
     {
         return $query->where('user_type', $type);
+    }
+
+    public function scopeDoctors($query)
+    {
+        return $query->where('user_type', 'doctor');
+    }
+
+    public function scopePatients($query)
+    {
+        return $query->where('user_type', 'patient');
+    }
+
+    public function scopeNurses($query)
+    {
+        return $query->where('user_type', 'nurse');
+    }
+
+    public function scopeByState($query, $stateId)
+    {
+        return $query->where('state_id', $stateId);
+    }
+
+    public function scopeByGender($query, $gender)
+    {
+        return $query->where('gender', $gender);
+    }
+
+    // Additional helper methods
+    public function hasVerifiedEmail(): bool
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    public function hasVerifiedPhone(): bool
+    {
+        return !is_null($this->phone_verified_at);
+    }
+
+    public function markEmailAsVerified(): bool
+    {
+        return $this->forceFill([
+            'email_verified_at' => $this->freshTimestamp(),
+        ])->save();
+    }
+
+    public function markPhoneAsVerified(): bool
+    {
+        return $this->forceFill([
+            'phone_verified_at' => $this->freshTimestamp(),
+        ])->save();
     }
 }

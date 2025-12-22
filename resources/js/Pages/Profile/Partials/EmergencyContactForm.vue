@@ -1,15 +1,19 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import { useForm, router } from '@inertiajs/vue3';
 import TextInput from '@/Components/TextInput.vue';
+import Checkbox from '@/Components/Checkbox.vue'; // Make sure you have this component
 
 const props = defineProps({
     profile: {
         type: Object,
         required: true
     },
-   
+    userAddress: { // Add this prop to get user's address
+        type: String,
+        default: ''
+    }
 });
 
 const emit = defineEmits(['updated']);
@@ -21,7 +25,19 @@ const form = useForm({
     emergency_contact_name: props.profile.emergency_contact_name || '',
     emergency_contact_number: props.profile.emergency_contact_number || '',
     emergency_contact_relationship: props.profile.emergency_contact_relationship || '',
-    
+    emergency_contact_address: props.profile.emergency_contact_address || '',
+    same_as_users_address: props.profile.same_as_users_address || false,
+});
+
+// Watch for changes to same_as_users_address
+watch(() => form.same_as_users_address, (newValue) => {
+    if (newValue && props.userAddress) {
+        // Auto-fill the address field with user's address
+        form.emergency_contact_address = props.userAddress;
+    } else if (newValue) {
+        // If no user address is available, clear the field
+        form.emergency_contact_address = '';
+    }
 });
 
 // Start editing
@@ -31,6 +47,8 @@ const startEditing = () => {
     form.emergency_contact_name = props.profile.emergency_contact_name || '';
     form.emergency_contact_number = props.profile.emergency_contact_number || '';
     form.emergency_contact_relationship = props.profile.emergency_contact_relationship || '';
+    form.emergency_contact_address = props.profile.emergency_contact_address || '';
+    form.same_as_users_address = props.profile.same_as_users_address || false;
     form.clearErrors();
 };
 
@@ -42,6 +60,16 @@ const cancelEditing = () => {
 
 // Submit form
 const submitForm = () => {
+    // If same_as_users_address is true, we might want to send the user's address
+    // instead of the emergency_contact_address, or handle it on the backend
+    const formData = {
+        ...form.data(),
+        // If same_as_users_address is checked, we can either:
+        // 1. Send empty string for emergency_contact_address
+        // 2. Send user's address as emergency_contact_address
+        // 3. Let backend handle it based on same_as_users_address flag
+        emergency_contact_address: form.same_as_users_address ? props.userAddress : form.emergency_contact_address
+    };
     
     form.put('emergencycontact-update', {
         preserveScroll: true,
@@ -100,56 +128,88 @@ const submitForm = () => {
                         <InputLabel for="emergency_contact_name" value="Emergency contact name" />
                       
                         <TextInput
-                                type="text"
-                                id="emergency_contact_name"
-                                v-model="form.emergency_contact_name"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                :class="{ 'border-red-300': form.errors.emergency_contact_name }"
-                            />
+                            type="text"
+                            id="emergency_contact_name"
+                            v-model="form.emergency_contact_name"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            :class="{ 'border-red-300': form.errors.emergency_contact_name }"
+                        />
                         <p v-if="form.errors.emergency_contact_name" class="mt-1 text-sm text-red-600">
                             {{ form.errors.emergency_contact_name }}
                         </p>
                     </div>
                     
-                    <!-- Height and Weight -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <InputLabel for="emergency_contact_number" value="Emergency contact number" />
-                            
-                            <TextInput
-                                type="text"
-                                id="emergency_contact_number"
-                                v-model="form.emergency_contact_number"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                :class="{ 'border-red-300': form.errors.emergency_contact_number }"
-                            />
-                            <p v-if="form.errors.emergency_contact_number" class="mt-1 text-sm text-red-600">
-                                {{ form.errors.emergency_contact_number }}
-                            </p>
-                        </div>
+                    <div>
+                        <InputLabel for="emergency_contact_number" value="Emergency contact number" />
                         
+                        <TextInput
+                            type="text"
+                            id="emergency_contact_number"
+                            v-model="form.emergency_contact_number"
+                            class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            :class="{ 'border-red-300': form.errors.emergency_contact_number }"
+                        />
+                        <p v-if="form.errors.emergency_contact_number" class="mt-1 text-sm text-red-600">
+                            {{ form.errors.emergency_contact_number }}
+                        </p>
                     </div>
-                                        
                 </div>
                 
                 <!-- Right Column -->
                 <div class="space-y-6">
-                        <div>
-                            <InputLabel for="emergency_contact_relationship" value="Emergency contact relationship" />
-                               
-                            <TextInput
-                                type="text"
-                                id="emergency_contact_relationship"
-                                v-model="form.emergency_contact_relationship"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                :class="{ 'border-red-300': form.errors.emergency_contact_relationship }"
+                    <div>
+                        <InputLabel for="emergency_contact_relationship" value="Emergency contact relationship" />
+                           
+                        <TextInput
+                            type="text"
+                            id="emergency_contact_relationship"
+                            v-model="form.emergency_contact_relationship"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            :class="{ 'border-red-300': form.errors.emergency_contact_relationship }"
+                        />
+                        <p v-if="form.errors.emergency_contact_relationship" class="mt-1 text-sm text-red-600">
+                            {{ form.errors.emergency_contact_relationship }}
+                        </p>
+                    </div>
+                    
+                    <!-- Same as User's Address Checkbox -->
+                    <div class="pt-2">
+                        <label class="flex items-center">
+                            <Checkbox
+                                id="same_as_users_address"
+                                v-model:checked="form.same_as_users_address"
+                                :checked="form.same_as_users_address"
                             />
-                            <p v-if="form.errors.emergency_contact_relationship" class="mt-1 text-sm text-red-600">
-                                {{ form.errors.emergency_contact_relationship }}
-                            </p>
+                            <span class="ml-2 text-sm text-gray-700">
+                                Same as my address
+                            </span>
+                        </label>
+                        <p v-if="form.errors.same_as_users_address" class="mt-1 text-sm text-red-600">
+                            {{ form.errors.same_as_users_address }}
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <InputLabel for="emergency_contact_address" value="Emergency contact address" />
+                        
+                        <textarea 
+                            id="emergency_contact_address"
+                            rows="3"
+                            v-model="form.emergency_contact_address"
+                            :disabled="form.same_as_users_address"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-100 disabled:text-gray-500"
+                            :class="{ 
+                                'border-red-300': form.errors.emergency_contact_address,
+                                'bg-gray-100 text-gray-500': form.same_as_users_address
+                            }"
+                        ></textarea>
+                        <div v-if="form.same_as_users_address" class="mt-1 text-sm text-blue-600">
+                            Using your address: {{ userAddress || 'No address found' }}
                         </div>
-                    
-                    
+                        <p v-if="form.errors.emergency_contact_address" class="mt-1 text-sm text-red-600">
+                            {{ form.errors.emergency_contact_address }}
+                        </p>
+                    </div>
                 </div>
             </div>
             
@@ -180,40 +240,54 @@ const submitForm = () => {
         <div v-else class="grid grid-cols-1 gap-6">
             <!-- Left Column -->
             <div class="space-y-6">
-                            <div class="p-6 bg-red-50 border border-red-100 rounded-xl">
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
-                                        <h4 class="text-lg font-medium text-gray-900">Emergency Contact</h4>
-                                        <p class="mt-1 text-sm text-gray-600">This information is critical for emergency medical situations</p>
-                                    </div>
-                                </div>
+                <div class="p-6 bg-red-50 border border-red-100 rounded-xl">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
                             </div>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Contact Name</label>
-                                    <div class="text-lg font-medium text-gray-900">{{ profile.emergency_contact_name || 'Not set' }}</div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                    <div class="text-lg font-medium text-gray-900">{{ profile.emergency_contact_number || 'Not set' }}</div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
-                                    <div class="text-lg font-medium text-gray-900">{{ profile.emergency_contact_relationship || 'Not set' }}</div>
-                                </div>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="text-lg font-medium text-gray-900">Emergency Contact</h4>
+                            <p class="mt-1 text-sm text-gray-600">This information is critical for emergency medical situations</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Name</label>
+                        <div class="text-lg font-medium text-gray-900">{{ profile.emergency_contact_name || 'Not set' }}</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                        <div class="text-lg font-medium text-gray-900">{{ profile.emergency_contact_number || 'Not set' }}</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
+                        <div class="text-lg font-medium text-gray-900">{{ profile.emergency_contact_relationship || 'Not set' }}</div>
+                    </div>
+                     <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <div class="text-lg font-medium text-gray-900">
+                        <template v-if="profile.same_as_users_address">
+                            <span class="text-blue-600">Same as my address</span>
+                            <div class="text-sm text-gray-600 mt-1">
+                                {{ userAddress || 'User address not available' }}
                             </div>
+                        </template>
+                        <template v-else>
+                            {{ profile.emergency_contact_address || 'Not set' }}
+                        </template>
+                    </div>
+                </div>
+                </div>
+                
+                <!-- Address Display -->
+               
             </div>
-            
-        
         </div>
     </div>
 </template>
-

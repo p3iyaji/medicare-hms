@@ -13,7 +13,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create permissions
+        // Create permissions FIRST
         $permissions = [
             'view dashboard',
             'view profile',
@@ -32,10 +32,10 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Create roles and assign permissions
+        // Create roles
         $roles = [
             'patient' => [
                 'view dashboard',
@@ -88,8 +88,9 @@ class RolesAndPermissionsSeeder extends Seeder
             ],
         ];
 
+        // Create roles and assign permissions
         foreach ($roles as $roleName => $rolePermissions) {
-            $role = Role::create(['name' => $roleName]);
+            $role = Role::firstOrCreate(['name' => $roleName]);
             $role->givePermissionTo($rolePermissions);
         }
     }

@@ -30,7 +30,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/medical-update', [ProfileController::class, 'updateMedical']);
     Route::put('/emergencycontact-update', [ProfileController::class, 'updateEmergencyContact']);
     Route::put('insuranceinfo-update', [ProfileController::class, 'insuranceInfoUpdate']);
+    Route::get('/profile-export', [ProfileController::class, 'exportPdf'])->name('profile.export.pdf');
     
+    // Profile forms page
+    Route::get('/profile/forms', function () {
+        return inertia('Profile/Forms');
+    })->name('profile.forms');
+    
+    // Blank form downloads
+    Route::get('/profile/forms/download/complete', [ProfileController::class, 'exportBlankForm'])
+        ->name('profile.forms.download.complete');
+    
+    Route::get('/profile/forms/download/compact', [ProfileController::class, 'exportCompactBlankForm'])
+        ->name('profile.forms.download.compact');
     // Appointments
     Route::get('/appointments', function () {
         return inertia('Appointments/Index');

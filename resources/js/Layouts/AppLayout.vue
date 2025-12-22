@@ -156,7 +156,7 @@ const navigation = computed(() => {
         baseNav.push(
             { name: 'My Appointments', href: '/appointments', icon: 'CalendarIcon', current: window.location.pathname.startsWith('/appointments'), visible: true },
             { name: 'Medical Records', href: '/medical-records', icon: 'DocumentTextIcon', current: window.location.pathname.startsWith('/medical-records'), visible: true },
-            { name: 'Billing', href: '/billing', icon: 'CreditCardIcon', current: window.location.pathname.startsWith('/billing'), visible: true }
+            { name: 'Billing', href: '/billing', icon: 'CreditCardIcon', current: window.location.pathname.startsWith('/billing'), visible: true },
         )
     }
 
@@ -164,7 +164,8 @@ const navigation = computed(() => {
         baseNav.push(
             { name: 'Patients', href: '/patients', icon: 'UserGroupIcon', current: window.location.pathname.startsWith('/patients'), visible: true },
             { name: 'Appointments', href: '/appointments', icon: 'CalendarIcon', current: window.location.pathname.startsWith('/appointments'), visible: true },
-            { name: 'Medical Records', href: '/medical-records', icon: 'DocumentTextIcon', current: window.location.pathname.startsWith('/medical-records'), visible: true }
+            { name: 'Medical Records', href: '/medical-records', icon: 'DocumentTextIcon', current: window.location.pathname.startsWith('/medical-records'), visible: true },
+            { name: 'Profile Forms', href: '/profile/forms', icon: 'DocumentDownloadIcon', current: window.location.pathname.startsWith('/profile/forms'), visible: true } // NEW
         )
     }
 
@@ -175,7 +176,8 @@ const navigation = computed(() => {
             { name: 'Appointments', href: '/appointments', icon: 'CalendarIcon', current: window.location.pathname.startsWith('/appointments'), visible: true },
             { name: 'Medical Records', href: '/medical-records', icon: 'DocumentTextIcon', current: window.location.pathname.startsWith('/medical-records'), visible: true },
             { name: 'Reports', href: '/reports', icon: 'ChartBarIcon', current: window.location.pathname.startsWith('/reports'), visible: true },
-            { name: 'Settings', href: '/settings', icon: 'CogIcon', current: window.location.pathname.startsWith('/settings'), visible: true }
+            { name: 'Settings', href: '/settings', icon: 'CogIcon', current: window.location.pathname.startsWith('/settings'), visible: true },
+            { name: 'Profile Forms', href: '/profile/forms', icon: 'DocumentDownloadIcon', current: window.location.pathname.startsWith('/profile/forms'), visible: true } // NEW
         )
     }
 
