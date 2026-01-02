@@ -4,6 +4,8 @@ import '../css/app.css';
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { ZiggyVue } from 'ziggy-js';
+import { Ziggy } from './ziggy'; 
 
 // Create a fallback route function
 const fallbackRoute = (name, params = {}, absolute = false) => {
@@ -24,6 +26,7 @@ const fallbackRoute = (name, params = {}, absolute = false) => {
         'appointments.create': '/appointments/create',
         'medical-records.index': '/medical-records',
         'patients.index': '/patients',
+        'patients.create': '/patients/create',
         'doctors.index': '/doctors',
         'reports.index': '/reports',
         'settings': '/settings',
@@ -62,6 +65,7 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         return createApp({ render: () => h(App, props) })
             .use(plugin)
+            .use(ZiggyVue, Ziggy) 
             .mount(el);
     },
     progress: {

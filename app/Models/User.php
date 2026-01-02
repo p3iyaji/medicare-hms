@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,12 +13,14 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\Permission\Traits\HasRoles;
 use Carbon\Carbon;
 
+
 /**
  * @property Carbon|null $date_of_birth
  */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
+    use LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -29,8 +33,9 @@ class User extends Authenticatable
         'phone',
         'password',
         'user_type',
+        'patient_no',
         'title',
-        'first_name', 
+        'first_name',
         'middle_name',
         'last_name',
         'date_of_birth',
@@ -77,7 +82,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'phone_verified_at' => 'datetime',  
+            'phone_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_login_at' => 'datetime',
             'date_of_birth' => 'date:Y-m-d',
@@ -87,8 +92,16 @@ class User extends Authenticatable
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
-            'spoken_languages' => 'array', 
+            'spoken_languages' => 'array',
         ];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 
     protected static function boot()
@@ -125,7 +138,7 @@ class User extends Authenticatable
 
     public function specializations()
     {
-        return $this->belongsToMany(Specialization::class, 'user_specializations')  
+        return $this->belongsToMany(Specialization::class, 'user_specializations')
             ->withPivot('years_of_experience', 'certification_number')
             ->withTimestamps();
     }
@@ -165,7 +178,7 @@ class User extends Authenticatable
             $initials .= strtoupper(substr($this->first_name, 0, 1));
         }
         if ($this->middle_name) {
-            $initials .= strtoupper(substr($this->middle_name, 0, 1));   
+            $initials .= strtoupper(substr($this->middle_name, 0, 1));
         }
 
         if ($this->last_name) {
@@ -187,7 +200,7 @@ class User extends Authenticatable
         if ($this->last_name) {
             $parts[] = $this->last_name;
         }
-        
+
         return implode(' ', $parts) ?: 'User';
     }
 

@@ -49,7 +49,7 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string|max:20|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'user_type' => 'required|in:patient,doctor,nurse,admin,lab_technician,caregiver',
+            
         ]);
 
        $user = DB::transaction(function () use ($request) {
@@ -58,11 +58,14 @@ class RegisteredUserController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'password' => Hash::make($request->password),
-                'user_type' => $request->user_type,
+                'user_type' => 'patient',
+                'patient_no' => 'NMC-' . random_int(100000, 999999),
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
+                'phone_verified_at' => now(),
+                'email_verified_at' => now(),
                 'is_active' => true,
-                'is_verified' => false,
+                'is_verified' => true,
             ]);
 
             // Assign default role based on user type

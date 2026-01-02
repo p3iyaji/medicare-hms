@@ -32,11 +32,27 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $loginService->attempt($request);
+        try {
+            $loginService->attempt($request);
 
-        $request->session()->regenerate();
+            $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+            return redirect()->intended(route('dashboard', absolute: false));
+        } catch (\Exception $e) {
+            if ($e->getMessage() === 'Account deactivated') {
+                Auth::guard('web')->logout();
+
+                $request->session()->invalidate();
+
+                $request->session()->regenerateToken();
+
+                return redirect()->route('deactivated');
+            }
+
+            return redirect()->back()
+                ->withInput($request->only('email', 'remember'))
+                ->withErrors(['email' => 'The provided credentials do not match our records.']);
+        }
     }
 
     /**

@@ -30,48 +30,9 @@ class ProfileController extends Controller
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'profile' => $profile,
             'status' => session('status'),
-            'gender' => [
-                'male' => 'Male',
-                'female' => 'Female',
-                'others' => 'Others',
-                'prefer_not_to_say'=> 'Prefer not to say',
-            ],
-            'titles' => [
-                        'Mr' => 'Mr', 
-                        'Mrs' => 'Mrs', 
-                        'Miss' => 'Miss', 
-                        'Ms' => 'Ms', 
-                        'Dr' => 'Dr', 
-                        'Prof' => 'Prof', 
-                        'Alhaji' => 'Alhaji',
-                    ],
             'nationalities'=> $nationalities,
             'states'=> $states,
-            'religion' => [
-                'Christianity' => 'Christianity', 
-                'Islam' => 'Islam', 
-                'None' => 'None', 
-                'Prefer not to say' => 'Prefer not to say'],
-            'bloodtypes' => [
-                'A+' => 'A+',
-                'A-' => 'A-',
-                'B+' => 'B+', 
-                'B-' => 'B-',
-                'AB+' => 'AB+', 
-                'AB-' => 'AB-',
-                'O+' => 'O+', 
-                'O-' => 'O-'
-            ],
-            'genotypes' => [
-                'AA' => 'AA', 
-                'AS' => 'AS', 
-                'AC' => 'AC', 
-                'SS' => 'SS', 
-                'SC' => 'SC', 
-                'CC' => 'CC'
-            ],    
-
-           
+                    
         ]);
     }
 
@@ -83,6 +44,7 @@ class ProfileController extends Controller
         $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
+           
 
         ]);
 

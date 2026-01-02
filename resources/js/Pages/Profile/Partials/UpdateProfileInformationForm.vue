@@ -1,9 +1,8 @@
 <script setup>
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import { Link, useForm, usePage } from '@inertiajs/vue3';
+import InputLabel from "@/Components/InputLabel.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import TextInput from "@/Components/TextInput.vue";
+import { Link, useForm, usePage } from "@inertiajs/vue3";
 
 defineProps({
     mustVerifyEmail: {
@@ -12,7 +11,6 @@ defineProps({
     status: {
         type: String,
     },
-    
 });
 
 const user = usePage().props.auth.user;
@@ -20,7 +18,7 @@ const genders = usePage().props.gender;
 
 const form = useForm({
     first_name: user.first_name,
-    middle_name: user.middle_name || '',
+    middle_name: user.middle_name || "",
     last_name: user.last_name,
     email: user.email,
     date_of_birth: user.date_of_birth,
@@ -28,14 +26,14 @@ const form = useForm({
 });
 
 const updateProfile = () => {
-    form.patch('profile', {
+    form.patch("profile", {
         preserveScroll: true,
         onSuccess: () => form.reset,
         onError: () => {
             //
-        }
-    })
-}
+        },
+    });
+};
 </script>
 
 <template>
@@ -50,10 +48,7 @@ const updateProfile = () => {
             </p>
         </header>
 
-        <form
-            @submit.prevent="updateProfile"
-            class="mt-6 space-y-6"
-        >
+        <form @submit.prevent="updateProfile" class="mt-6 space-y-6">
             <div>
                 <InputLabel for="first_name" value="First name" />
 
@@ -69,7 +64,7 @@ const updateProfile = () => {
 
                 <InputError class="mt-2" :message="form.errors.first_name" />
             </div>
-              <div>
+            <div>
                 <InputLabel for="middle_name" value="Middle name" />
 
                 <TextInput
@@ -99,7 +94,6 @@ const updateProfile = () => {
                 <InputError class="mt-2" :message="form.errors.last_name" />
             </div>
 
-            
             <div>
                 <InputLabel for="date_of_birth" value="Date of birth" />
 
@@ -108,16 +102,26 @@ const updateProfile = () => {
                     type="date"
                     class="mt-1 block w-full"
                     v-model="form.date_of_birth"
-                 />
-                 
-                 <InputError class="mt-2" :message="form.errors.date_of_birth" />
+                />
+
+                <InputError class="mt-2" :message="form.errors.date_of_birth" />
             </div>
             <div>
                 <InputLabel for="gender" valu="Gender" />
 
-                <select id="gender" class="mt-1 block w-full rounded-md" v-model="form.gender" >
+                <select
+                    id="gender"
+                    class="mt-1 block w-full rounded-md"
+                    v-model="form.gender"
+                >
                     <option value="">Select your gender</option>
-                    <option v-for="(label, value) in genders" :key="value" :value="value">{{ label }}</option>
+                    <option
+                        v-for="(label, value) in genders"
+                        :key="value"
+                        :value="value"
+                    >
+                        {{ label }}
+                    </option>
                 </select>
             </div>
 
@@ -155,7 +159,9 @@ const updateProfile = () => {
                         v-if="form.recentlySuccessful"
                         class="text-sm text-gray-600"
                     >
-                       <span class="text-white bg-green-400 p-1 rounded-full"> Saved successfully</span>
+                        <span class="text-white bg-green-400 p-1 rounded-full">
+                            Saved successfully</span
+                        >
                     </p>
                 </Transition>
             </div>

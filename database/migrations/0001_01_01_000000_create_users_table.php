@@ -21,8 +21,9 @@ return new class extends Migration
         $table->string('password');
 
         $table->enum('user_type', [
-            'patient','doctor','nurse','admin','lab_technician','caregiver'
+            'patient','doctor','nurse','admin','lab technician','caregiver'
         ])->default('patient');
+        $table->string('patient_no')->unique()->nullable();
 
         $table->enum('title', ['Mr', 'Mrs', 'Miss', 'Ms', 'Dr', 'Prof', 'Engr', 'Barr', 'Arc', 'Chief', 'Alhaji', 'Alhaja', 'Pastor', 'Mallam', 'Oba', 'Elder', 'Sir', 'Lady', 'HRH', 'HRM'])->nullable()->default(null);        
         $table->string('first_name', 100)->nullable();
@@ -30,7 +31,7 @@ return new class extends Migration
 
         $table->string('last_name', 100)->nullable();
         $table->date('date_of_birth')->nullable();
-        $table->enum('gender', ['male','female','other','prefer_not_to_say'])->nullable();
+        $table->enum('gender', ['male','female','other','prefer not to say'])->nullable();
         $table->string('profile_image')->nullable();
 
         $table->foreignId('nationality_id')->nullable()->constrained('nationalities')->nullOnDelete();

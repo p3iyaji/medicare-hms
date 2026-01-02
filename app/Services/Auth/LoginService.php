@@ -15,6 +15,7 @@ class LoginService
 
         $user = User::where('email', $credentials['email'])->first();
 
+
         // Record login attempt (initially failed)
         $attempt = LoginAttempt::create([
             'user_id' => $user?->id,
@@ -28,7 +29,7 @@ class LoginService
             throw new \Exception('Invalid credentials');
         }
 
-        if (! $user->is_active) {
+        if (! $user->is_active === true) {
             throw new \Exception('Account deactivated');
         }
 

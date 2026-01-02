@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
                         ? (function () {
                             /** @var User $user */
                             $user = Auth::user();
-                            
+
                             // Create an array with ALL user data including computed attributes
                             $userData = [
                                 // Basic fields
@@ -46,9 +46,9 @@ class AppServiceProvider extends ServiceProvider
                                 'user_type' => $user->user_type,
                                 'date_of_birth' => $user->date_of_birth?->format('Y-m-d'),
                                 'gender' => $user->gender,
-                                'profile_image' => $user->profile_image 
-                                    ? (filter_var($user->profile_image, FILTER_VALIDATE_URL) 
-                                        ? $user->profile_image 
+                                'profile_image' => $user->profile_image
+                                    ? (filter_var($user->profile_image, FILTER_VALIDATE_URL)
+                                        ? $user->profile_image
                                         : asset('storage/' . $user->profile_image))
                                     : null,
                                 'is_verified' => $user->is_verified,
@@ -57,7 +57,7 @@ class AppServiceProvider extends ServiceProvider
                                 'email_verified_at' => $user->email_verified_at,
                                 'phone_verified_at' => $user->phone_verified_at,
                                 'last_login_at' => $user->last_login_at?->format('Y-m-d H:i:s'),
-                                
+
                                 // Personal Information
                                 'occupation' => $user->occupation,
                                 'work_address' => $user->work_address,
@@ -68,13 +68,13 @@ class AppServiceProvider extends ServiceProvider
                                 'county' => $user->county,
                                 'district' => $user->district,
                                 'residential_address' => $user->residential_address,
-                                
+
                                 // Foreign keys
                                 'nationality_id' => $user->nationality_id,
                                 'state_id' => $user->state_id,
                                 'ethinic_region_id' => $user->ethinic_region_id,
                             ];
-                            
+
                             // Add computed attributes
                             $computedAttributes = [
                                 'name' => $user->name, // Uses getNameAttribute()
@@ -87,19 +87,19 @@ class AppServiceProvider extends ServiceProvider
                                 'phone_verified' => !is_null($user->phone_verified_at),
                                 'profile_complete' => $this->isProfileComplete($user),
                             ];
-                            
+
                             // Eager load relationships
                             $user->load(['profile', 'roles.permissions', 'nationality', 'state', 'ethnicRegion', 'specializations']);
-                            
+
                             $profile = $user->profile;
-                            
+
                             // Add relationships
                             $relationshipData = [
                                 // Location Relationships
                                 'nationality' => $user->nationality?->only(['id', 'name', 'code']),
                                 'state' => $user->state?->only(['id', 'name']),
                                 'ethnic_region' => $user->ethnicRegion?->only(['id', 'name']),
-                                
+
                                 // Specializations (for doctors)
                                 'specializations' => $user->specializations->map(function ($specialization) {
                                     return [
@@ -109,18 +109,18 @@ class AppServiceProvider extends ServiceProvider
                                         'certification_number' => $specialization->pivot->certification_number,
                                     ];
                                 }),
-                                
+
                                 // Roles & Permissions
                                 'roles' => $user->getRoleNames(),
                                 'permissions' => $user->getAllPermissions()->pluck('name'),
-                                
+
                                 // Medical Profile Data
                                 'profile_data' => $profile ? [
                                     'blood_type' => $profile->blood_type,
                                     'genotype' => $profile->genotype,
                                     'height' => $profile->height,
                                     'weight' => $profile->weight,
-                                    'emergency_contact' => $profile->emergency_contact_name 
+                                    'emergency_contact' => $profile->emergency_contact_name
                                         ? [
                                             'name' => $profile->emergency_contact_name,
                                             'phone' => $profile->emergency_contact_number,
@@ -142,14 +142,14 @@ class AppServiceProvider extends ServiceProvider
                                     'chronic_conditions' => $profile->chronic_conditions ?: [],
                                 ] : null,
                             ];
-                            
+
                             // Merge all data
                             return array_merge($userData, $computedAttributes, $relationshipData);
                         })()
                         : null,
                 ];
             },
-            
+
             // ... rest of your share method remains the same
             'flash' => function () {
                 return [
@@ -160,7 +160,7 @@ class AppServiceProvider extends ServiceProvider
                     'status' => Session::get('status'),
                 ];
             },
-            
+
             'app' => function () {
                 return [
                     'name' => config('app.name'),
@@ -171,17 +171,32 @@ class AppServiceProvider extends ServiceProvider
                     'fallback_locale' => config('app.fallback_locale'),
                 ];
             },
-            
+
             'medical' => function () {
                 return [
                     'blood_types' => [
-                        'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'
+                        'A+',
+                        'A-',
+                        'B+',
+                        'B-',
+                        'AB+',
+                        'AB-',
+                        'O+',
+                        'O-'
                     ],
                     'genotypes' => [
-                        'AA', 'AS', 'AC', 'SS', 'SC', 'CC'
+                        'AA',
+                        'AS',
+                        'AC',
+                        'SS',
+                        'SC',
+                        'CC'
                     ],
                     'genders' => [
-                        'male', 'female', 'other', 'prefer_not_to_say'
+                        'male',
+                        'female',
+                        'other',
+                        'prefer not to say'
                     ],
                     'user_types' => [
                         'patient' => 'Patient',
@@ -192,23 +207,29 @@ class AppServiceProvider extends ServiceProvider
                         'caregiver' => 'Caregiver',
                     ],
                     'titles' => [
-                        'Mr' => 'Mr', 
-                        'Mrs' => 'Mrs', 
-                        'Miss' => 'Miss', 
-                        'Ms' => 'Ms', 
-                        'Dr' => 'Dr', 
-                        'Prof' => 'Prof', 
+                        'Mr' => 'Mr',
+                        'Mrs' => 'Mrs',
+                        'Miss' => 'Miss',
+                        'Ms' => 'Ms',
+                        'Dr' => 'Dr',
+                        'Prof' => 'Prof',
                         'Alhaji' => 'Alhaji',
+                    ],
+                    'religions' => [
+                        'Christianity' => 'Christianity',
+                        'Islam' => 'Islam',
+                        'None' => 'None',
+                        'Prefer not to say' => 'Prefer not to say'
                     ],
                 ];
             },
-            
+
             'csrf_token' => function () {
                 return csrf_token();
             },
         ]);
     }
-    
+
     /**
      * Get user-friendly label for user type
      */
@@ -222,10 +243,10 @@ class AppServiceProvider extends ServiceProvider
             'lab_technician' => 'Lab Technician',
             'caregiver' => 'Caregiver',
         ];
-        
+
         return $labels[$userType] ?? 'User';
     }
-    
+
     /**
      * Check if user profile is complete
      */
@@ -239,13 +260,13 @@ class AppServiceProvider extends ServiceProvider
             'date_of_birth' => $user->date_of_birth,
             'gender' => $user->gender,
         ];
-        
+
         foreach ($requiredFields as $field => $value) {
             if (empty($value)) {
                 return false;
             }
         }
-        
+
         return true;
     }
 }
