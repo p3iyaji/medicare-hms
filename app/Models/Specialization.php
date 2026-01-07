@@ -21,4 +21,9 @@ class Specialization extends Model
                     ->withPivot('years_of_experience', 'certification_number')
                     ->withTimestamps();
     }
+
+    public function doctors()
+    {
+        return $this->users()->where('user_type', 'doctor');
+    }
 }

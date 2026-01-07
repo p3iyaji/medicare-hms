@@ -222,7 +222,7 @@ const exportPDF = () => {
                                 <h1
                                     class="text-xl sm:text-2xl font-bold truncate"
                                 >
-                                    {{ user.full_name }}
+                                    {{ user.full_name }} ({{ user.patient_no }})
                                 </h1>
                                 <p class="text-blue-100 truncate">
                                     {{ user.email }}

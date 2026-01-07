@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\ScheduleExceptionController;
+use App\Http\Controllers\SpecializationController;
+use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PatientController;
 use Illuminate\Foundation\Application;
@@ -77,7 +81,40 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/patients/update/{patient}', [PatientController::class, 'update'])->name('patients.update');
     Route::delete('/patients/destroy/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
     
-    // Simple fallback routes
+    // Doctors (for admins)
+    Route::get('doctors', [DoctorController::class, 'index'])->name('doctors');
+    Route::get('/doctors/create', [DoctorController::class, 'create'])->name('doctors.create');
+    Route::post('/doctors/store', [DoctorController::class, 'store'])->name('doctors.store');
+    Route::get('/doctors/edit/{doctor}', [DoctorController::class,'edit'])->name('doctors.edit');
+    Route::put('/doctors/update/{doctor}', [DoctorController::class,'update'])->name('doctors.update');
+    Route::delete('/doctors/destroy/{doctor}', [DoctorController::class,'destroy'])->name('doctors.destroy');
+    Route::put('/doctors/{doctor}/deactivate', [DoctorController::class,'deactivate'])->name('doctors.deactivate');
+    Route::put('/doctors/{doctor}/activate', [DoctorController::class,'activate'])->name('doctors.activate');   
+    
+    // specializations
+    Route::get('/specializations', [SpecializationController::class, 'index'])->name('specializations');
+    Route::get('/specializations/create', [SpecializationController::class, 'create'])->name('specializations.create');
+    Route::post('/specializations/store', [SpecializationController::class, 'store'])->name('specializations.store');  
+    Route::get('/specializations/edit/{specialization}', [SpecializationController::class, 'edit'])->name('specializations.edit');
+    Route::put('/specializations/update/{specialization}', [SpecializationController::class, 'update'])->name('specializations.update');
+    Route::delete('/specializations/destroy/{specialization}', [SpecializationController::class, 'destroy'])->name('specializations.destroy');
+
+    // doctor schedules
+    Route::get('/schedules', [DoctorScheduleController::class, 'index'])->name('schedules');
+    Route::get('/schedules/create', [DoctorScheduleController::class, 'create'])->name('schedules.create');
+    Route::post('/schedules/store', [DoctorScheduleController::class, 'store'])->name('schedules.store');  
+    Route::get('/schedules/edit/{schedule}', [DoctorScheduleController::class,'edit'])->name('schedules.edit');
+    Route::put('/schedules/update/{schedule}', [DoctorScheduleController::class, 'update'])->name('schedules.update');
+    Route::delete('/schedules/destroy/{schedule}', [DoctorScheduleController::class, 'destroy'])->name('schedules.destroy');
+
+    // Schedule Exceptions
+    Route::get('/schedule-exceptions', [ScheduleExceptionController::class, 'index'])->name('schedule-exceptions');
+    Route::get('/schedule-exceptions/create', [ScheduleExceptionController::class,'create'])->name('schedule-exceptions.create');
+    Route::post('/schedule-exceptions/store', [ScheduleExceptionController::class,'store'])->name('schedule-exceptions.store');
+    Route::get('/schedule-exceptions/edit/{scheduleException}', [ScheduleExceptionController::class,'edit'])->name('schedule-exceptions.edit');
+    
+    
+    
     Route::get('/settings', function () {
         return inertia('Settings/Index');
     })->name('settings');
@@ -90,9 +127,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return inertia('Reports/Index');
     })->name('reports.index');
 
-    Route::get('/doctors', function () {
-        return inertia('Doctors/Index');
-    })->name('doctors.index');
+    
 });
 
 require __DIR__ . '/auth.php';

@@ -23,7 +23,7 @@ const scrollToTab = (tabId) => {
 };
 
 const props = defineProps({
-    patient: {
+    doctor: {
         type: Object,
         default: null,
     },
@@ -36,6 +36,10 @@ const props = defineProps({
         default: () => [],
     },
     ethnicRegions: {
+        type: Array,
+        default: () => [],
+    },
+    specializations: {
         type: Array,
         default: () => [],
     },
@@ -81,77 +85,88 @@ const bloodTypes = usePage().props.medical.blood_types;
 const genotypes = usePage().props.medical.genotypes;
 const showPassword = ref(false);
 
-const isEditing = computed(() => props.patient !== null);
+const isEditing = computed(() => props.doctor !== null);
 const pageTitle = computed(() =>
-    isEditing.value ? "Edit Patient" : "Create New Patient"
+    isEditing.value ? "Edit Doctor" : "Create New Doctor"
 );
 const pageSubtitle = computed(() =>
-    isEditing.value ? "Update patient information" : "Register a new patient"
+    isEditing.value ? "Update doctor information" : "Register a new doctor"
+);
+
+const doctorSpecializations = ref(
+    props.doctor?.specializations?.map((spec) => ({
+        specialization_id: spec.id,
+        years_of_experience: spec.pivot?.years_of_experience || "",
+        certification_number: spec.pivot?.certification_number || "",
+    })) || []
 );
 
 const form = useForm({
     // Basic Information
-    title: props.patient?.title || "",
-    first_name: props.patient?.first_name || "",
-    middle_name: props.patient?.middle_name || "",
-    last_name: props.patient?.last_name || "",
-    email: props.patient?.email || "",
-    phone: props.patient?.phone || "",
+    title: props.doctor?.title || "",
+    first_name: props.doctor?.first_name || "",
+    middle_name: props.doctor?.middle_name || "",
+    last_name: props.doctor?.last_name || "",
+    email: props.doctor?.email || "",
+    phone: props.doctor?.phone || "",
     password: "",
     password_confirmation: "",
 
     // Demographics
-    date_of_birth: props.patient?.date_of_birth || "",
-    gender: props.patient?.gender || "",
-    nationality_id: props.patient?.nationality_id || "",
-    state_id: props.patient?.state_id || "",
-    ethinic_region_id: props.patient?.ethinic_region_id || "",
-    religion: props.patient?.religion || "",
-    spoken_languages: props.patient?.spoken_languages || [],
+    date_of_birth: props.doctor?.date_of_birth || "",
+    gender: props.doctor?.gender || "",
+    nationality_id: props.doctor?.nationality_id || "",
+    state_id: props.doctor?.state_id || "",
+    ethinic_region_id: props.doctor?.ethinic_region_id || "",
+    religion: props.doctor?.religion || "",
+    spoken_languages: props.doctor?.spoken_languages || [],
 
     // Address
-    region: props.patient?.region || "",
-    county: props.patient?.county || "",
-    district: props.patient?.district || "",
-    residential_address: props.patient?.residential_address || "",
+    region: props.doctor?.region || "",
+    county: props.doctor?.county || "",
+    district: props.doctor?.district || "",
+    residential_address: props.doctor?.residential_address || "",
 
     // Occupation
-    occupation: props.patient?.occupation || "",
-    work_address: props.patient?.work_address || "",
-    industry: props.patient?.industry || "",
+    occupation: props.doctor?.occupation || "",
+    work_address: props.doctor?.work_address || "",
+    industry: props.doctor?.industry || "",
 
     // Medical Profile
-    blood_type: props.patient?.profile?.blood_type || "",
-    genotype: props.patient?.profile?.genotype || "",
-    height: props.patient?.profile?.height || "",
-    weight: props.patient?.profile?.weight || "",
-    allergies: props.patient?.profile?.allergies || [],
-    chronic_conditions: props.patient?.profile?.chronic_conditions || [],
+    blood_type: props.doctor?.profile?.blood_type || "",
+    genotype: props.doctor?.profile?.genotype || "",
+    height: props.doctor?.profile?.height || "",
+    weight: props.doctor?.profile?.weight || "",
+    allergies: props.doctor?.profile?.allergies || [],
+    chronic_conditions: props.doctor?.profile?.chronic_conditions || [],
 
     // Emergency Contact
-    emergency_contact_name:
-        props.patient?.profile?.emergency_contact_name || "",
+    emergency_contact_name: props.doctor?.profile?.emergency_contact_name || "",
     emergency_contact_number:
-        props.patient?.profile?.emergency_contact_number || "",
+        props.doctor?.profile?.emergency_contact_number || "",
     emergency_contact_relationship:
-        props.patient?.profile?.emergency_contact_relationship || "",
+        props.doctor?.profile?.emergency_contact_relationship || "",
     emergency_contact_address:
-        props.patient?.profile?.emergency_contact_address || "",
+        props.doctor?.profile?.emergency_contact_address || "",
     same_as_users_address:
-        props.patient?.profile?.same_as_users_address || false,
+        props.doctor?.profile?.same_as_users_address || false,
 
     // Insurance
-    insurance_provider: props.patient?.profile?.insurance_provider || "",
+    insurance_provider: props.doctor?.profile?.insurance_provider || "",
     insurance_policy_number:
-        props.patient?.profile?.insurance_policy_number || "",
+        props.doctor?.profile?.insurance_policy_number || "",
 
     // Primary Physician
-    primary_physician_id: props.patient?.profile?.primary_physician_id || "",
+    primary_physician_id: props.doctor?.profile?.primary_physician_id || "",
+
+    // Specialization
+    specializations_data: doctorSpecializations.value,
 
     // Account Settings
-    is_active: props.patient?.is_active ?? true,
-    is_verified: props.patient?.is_verified ?? true,
-    mfa_enabled: props.patient?.mfa_enabled ?? false,
+    user_type: "doctor",
+    is_active: props.doctor?.is_active ?? true,
+    is_verified: props.doctor?.is_verified ?? true,
+    mfa_enabled: props.doctor?.mfa_enabled ?? false,
 });
 
 // Form tabs
@@ -160,8 +175,46 @@ const tabs = [
     { id: 2, name: "Demographics" },
     { id: 3, name: "Medical Profile" },
     { id: 4, name: "Emergency Contact" },
-    { id: 5, name: "Account Settings" },
+    { id: 5, name: "Specializations" },
+    { id: 6, name: "Account Settings" },
 ];
+// specialization management
+const newSpecialization = ref({
+    specialization_id: "",
+    years_of_experience: "",
+    certificate_number: "",
+});
+
+const addSpecialization = () => {
+    if (!newSpecialization.value.specialization_id) {
+        alert("Please select a specialization.");
+        return;
+    }
+    const exists = doctorSpecializations.value.some(
+        (spec) =>
+            spec.specialization_id === newSpecialization.value.specialization_id
+    );
+
+    if (exists) {
+        alert("This specialization is already added.");
+        return;
+    }
+
+    doctorSpecializations.value.push({ ...newSpecialization.value });
+    form.specializations_data = doctorSpecializations.value;
+
+    // reset form
+    newSpecialization.value = {
+        specialization_id: "",
+        years_of_experience: "",
+        certification_number: "",
+    };
+};
+
+const removeSpecialization = (index) => {
+    doctorSpecializations.value.splice(index, 1);
+    form.specializations_data = doctorSpecializations.value;
+};
 
 // Multi-select handling for arrays
 const allergyInput = ref("");
@@ -260,8 +313,11 @@ watch(
 
 // Form submission
 const submitForm = () => {
+    // making sure specializations data is updated and added too
+    form.specializations_data = doctorSpecializations.value;
+
     if (isEditing.value) {
-        form.put("/patients/update/" + props.patient.id, {
+        form.put("/doctors/update/" + props.doctor.id, {
             preserveScroll: true,
             onSuccess: () => {
                 // Handle success
@@ -269,7 +325,7 @@ const submitForm = () => {
         });
     } else {
         console.log("Submitting form:");
-        form.post("/patients/store", {
+        form.post("/doctors/store", {
             preserveScroll: true,
             onSuccess: () => {
                 // Handle success
@@ -280,18 +336,18 @@ const submitForm = () => {
 
 // Cancel handler
 const handleCancel = () => {
-    router.visit(route("patients.index"));
+    router.visit(route("doctors.index"));
 };
 
 // Delete confirmation
 const showDeleteModal = ref(false);
 const confirmDelete = () => {
-    if (props.patient) {
-        router.delete("/patients/destroy/" + props.patient.id, {
+    if (props.doctor) {
+        router.delete("/doctors/destroy/" + props.doctor.id, {
             preserveScroll: true,
             onSuccess: () => {
                 showDeleteModal.value = false;
-                router.visit("patients");
+                router.visit("doctors");
             },
         });
     }
@@ -317,8 +373,8 @@ const copyPassword = async () => {
     }
 };
 
-// Patient number generation (if creating new)
-const generatePatientNumber = () => {
+// Doctor number generation (if creating new)
+const generateDoctorNumber = () => {
     if (!isEditing.value) {
         const prefix = "PAT";
         const timestamp = Date.now().toString().slice(-6);
@@ -327,7 +383,7 @@ const generatePatientNumber = () => {
             .padStart(3, "0");
         return `${prefix}${timestamp}${random}`;
     }
-    return props.patient?.patient_no;
+    return props.doctor?.doctor_no;
 };
 </script>
 
@@ -360,7 +416,7 @@ const generatePatientNumber = () => {
         </template>
 
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-            <!-- Patient Number Display -->
+            <!-- Doctor Number Display -->
             <div
                 v-if="isEditing"
                 class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-blue-50"
@@ -370,8 +426,8 @@ const generatePatientNumber = () => {
                 >
                     <div class="flex items-center">
                         <img
-                            v-if="patient.profile_image"
-                            :src="'/storage/' + patient.profile_image"
+                            v-if="doctor.profile_image"
+                            :src="'/storage/' + doctor.profile_image"
                             alt="Profile Image"
                             class="w-8 h-8 rounded-full object-cover mr-2"
                         />
@@ -380,23 +436,23 @@ const generatePatientNumber = () => {
                             class="h-10 w-10 m-2 rounded-full bg-blue-600 flex items-center justify-center"
                         >
                             <span class="text-white font-medium text-sm">{{
-                                patient.initials
+                                doctor.initials
                             }}</span>
                         </div>
                         <div>
                             <span
                                 class="text-xs sm:text-sm font-medium text-gray-700"
-                                >Patient ID:</span
+                                >Doctor ID:</span
                             >
                             <span
                                 class="ml-1 sm:ml-2 font-semibold text-blue-700 text-sm sm:text-base"
-                                >{{ patient.patient_no }}</span
+                                >{{ doctor.patient_no }}</span
                             >
                         </div>
                     </div>
                     <div class="text-xs sm:text-sm text-gray-600">
                         Created
-                        {{ new Date(patient.created_at).toLocaleDateString() }}
+                        {{ new Date(doctor.created_at).toLocaleDateString() }}
                     </div>
                 </div>
             </div>
@@ -572,7 +628,6 @@ const generatePatientNumber = () => {
                                     class="text-sm sm:text-base"
                                 />
                                 <div class="flex items-center">
-                                    <span class="text-gray-500 mr-2">+</span>
                                     <TextInput
                                         id="phone"
                                         v-model="form.phone"
@@ -588,7 +643,7 @@ const generatePatientNumber = () => {
                                 >
                             </div>
 
-                            <!-- Password Fields (only for new patients) -->
+                            <!-- Password Fields (only for new doctors) -->
                             <template v-if="!isEditing">
                                 <div class="space-y-1">
                                     <div
@@ -1397,7 +1452,6 @@ const generatePatientNumber = () => {
                                     class="text-sm sm:text-base"
                                 />
                                 <div class="flex items-center">
-                                    <span class="text-gray-500 mr-2">+</span>
                                     <TextInput
                                         id="emergency_contact_number"
                                         v-model="form.emergency_contact_number"
@@ -1422,7 +1476,7 @@ const generatePatientNumber = () => {
                                     for="same_as_users_address"
                                     class="ml-2 text-sm text-gray-700"
                                 >
-                                    Same as patient's residential address
+                                    Same as doctor's residential address
                                 </label>
                             </div>
 
@@ -1503,8 +1557,249 @@ const generatePatientNumber = () => {
                         </div>
                     </TabPanel>
 
-                    <!-- Tab 5: Account Settings -->
+                    <!-- Tab 5: specializations -->
                     <TabPanel class="px-4 sm:px-6 py-4 sm:py-6" :data-tab="5">
+                        <div class="space-y-6">
+                            <!-- Add Specialization Form -->
+                            <div class="bg-gray-50 rounded-lg p-4 sm:p-6">
+                                <h4
+                                    class="text-base sm:text-lg font-medium text-gray-900 mb-4"
+                                >
+                                    Add Specialization
+                                </h4>
+
+                                <div
+                                    class="grid grid-cols-1 md:grid-cols-3 gap-4"
+                                >
+                                    <!-- Specialization Select -->
+                                    <div class="space-y-1">
+                                        <InputLabel
+                                            for="specialization_select"
+                                            value="Specialization *"
+                                            class="text-sm sm:text-base"
+                                        />
+                                        <SelectInput
+                                            id="specialization_select"
+                                            v-model="
+                                                newSpecialization.specialization_id
+                                            "
+                                            class="w-full text-sm sm:text-base"
+                                        >
+                                            <option value="">
+                                                Select Specialization
+                                            </option>
+                                            <option
+                                                v-for="specialization in specializations"
+                                                :key="specialization.id"
+                                                :value="specialization.id"
+                                            >
+                                                {{ specialization.name }}
+                                            </option>
+                                        </SelectInput>
+                                    </div>
+
+                                    <!-- Years of Experience -->
+                                    <div class="space-y-1">
+                                        <InputLabel
+                                            for="years_of_experience"
+                                            value="Years of Experience"
+                                            class="text-sm sm:text-base"
+                                        />
+                                        <TextInput
+                                            id="years_of_experience"
+                                            v-model="
+                                                newSpecialization.years_of_experience
+                                            "
+                                            type="number"
+                                            min="0"
+                                            max="50"
+                                            class="w-full text-sm sm:text-base"
+                                            placeholder="e.g., 5"
+                                        />
+                                    </div>
+
+                                    <!-- Certification Number -->
+                                    <div class="space-y-1">
+                                        <InputLabel
+                                            for="certification_number"
+                                            value="Certification Number"
+                                            class="text-sm sm:text-base"
+                                        />
+                                        <TextInput
+                                            id="certification_number"
+                                            v-model="
+                                                newSpecialization.certification_number
+                                            "
+                                            type="text"
+                                            class="w-full text-sm sm:text-base"
+                                            placeholder="License/certification number"
+                                        />
+                                    </div>
+                                </div>
+
+                                <!-- Add Button -->
+                                <div class="mt-4 flex justify-end">
+                                    <PrimaryButton
+                                        @click="addSpecialization"
+                                        class="w-full sm:w-auto"
+                                    >
+                                        Add Specialization
+                                    </PrimaryButton>
+                                </div>
+                            </div>
+
+                            <!-- Specializations List -->
+                            <div>
+                                <h4
+                                    class="text-base sm:text-lg font-medium text-gray-900 mb-4"
+                                >
+                                    Doctor's Specializations
+                                    <span
+                                        class="text-sm font-normal text-gray-500"
+                                    >
+                                        ({{ doctorSpecializations.length }}
+                                        added)
+                                    </span>
+                                </h4>
+
+                                <!-- Empty State -->
+                                <div
+                                    v-if="doctorSpecializations.length === 0"
+                                    class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg"
+                                >
+                                    <svg
+                                        class="mx-auto h-12 w-12 text-gray-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                                        />
+                                    </svg>
+                                    <h3
+                                        class="mt-2 text-sm font-medium text-gray-900"
+                                    >
+                                        No specializations added
+                                    </h3>
+                                    <p class="mt-1 text-sm text-gray-500">
+                                        Add a specialization using the form
+                                        above.
+                                    </p>
+                                </div>
+
+                                <!-- Specializations Grid -->
+                                <div
+                                    v-else
+                                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                                >
+                                    <div
+                                        v-for="(
+                                            spec, index
+                                        ) in doctorSpecializations"
+                                        :key="index"
+                                        class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                                    >
+                                        <div
+                                            class="flex justify-between items-start mb-2"
+                                        >
+                                            <h5
+                                                class="font-medium text-gray-900 text-sm sm:text-base"
+                                            >
+                                                {{
+                                                    specializations.find(
+                                                        (s) =>
+                                                            s.id ==
+                                                            spec.specialization_id
+                                                    )?.name || "Unknown"
+                                                }}
+                                            </h5>
+                                            <button
+                                                @click="
+                                                    removeSpecialization(index)
+                                                "
+                                                class="text-red-600 hover:text-red-800 p-1"
+                                            >
+                                                <svg
+                                                    class="w-5 h-5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M6 18L18 6M6 6l12 12"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <div
+                                            class="space-y-2 text-xs sm:text-sm text-gray-600"
+                                        >
+                                            <div
+                                                v-if="spec.years_of_experience"
+                                                class="flex items-center"
+                                            >
+                                                <svg
+                                                    class="w-4 h-4 mr-2 text-gray-400 flex-shrink-0"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                    />
+                                                </svg>
+                                                <span
+                                                    >{{
+                                                        spec.years_of_experience
+                                                    }}
+                                                    years experience</span
+                                                >
+                                            </div>
+
+                                            <div
+                                                v-if="spec.certification_number"
+                                                class="flex items-center"
+                                            >
+                                                <svg
+                                                    class="w-4 h-4 mr-2 text-gray-400 flex-shrink-0"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                                                    />
+                                                </svg>
+                                                <span class="truncate"
+                                                    >Cert:
+                                                    {{
+                                                        spec.certification_number
+                                                    }}</span
+                                                >
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </TabPanel>
+
+                    <!-- Tab 6: Account Settings -->
+                    <TabPanel class="px-4 sm:px-6 py-4 sm:py-6" :data-tab="6">
                         <div
                             class="space-y-6 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-2 sm:gap-4 md:gap-6"
                         >
@@ -1535,7 +1830,7 @@ const generatePatientNumber = () => {
                                                     Active
                                                 </span>
                                                 <span class="text-gray-600"
-                                                    >Patient can log in</span
+                                                    >Doctor can log in</span
                                                 >
                                             </div>
                                         </label>
@@ -1559,7 +1854,7 @@ const generatePatientNumber = () => {
                                                     Inactive
                                                 </span>
                                                 <span class="text-gray-600"
-                                                    >Patient cannot log in</span
+                                                    >Doctor cannot log in</span
                                                 >
                                             </div>
                                         </label>
@@ -1664,17 +1959,17 @@ const generatePatientNumber = () => {
                                 <p
                                     class="text-xs sm:text-sm text-gray-600 mt-1"
                                 >
-                                    When enabled, patient will need to verify
+                                    When enabled, doctor will need to verify
                                     login via email or SMS code for enhanced
                                     security.
                                 </p>
                             </div>
 
-                            <!-- User Type (hidden, set to patient) -->
+                            <!-- User Type (hidden, set to doctor) -->
                             <input
                                 type="hidden"
                                 v-model="form.user_type"
-                                value="patient"
+                                value="doctor"
                             />
                         </div>
 
@@ -1743,7 +2038,7 @@ const generatePatientNumber = () => {
                     >
                         <span v-if="form.processing">Saving...</span>
                         <span v-else>
-                            {{ isEditing ? "Update" : "Create" }} Patient
+                            {{ isEditing ? "Update" : "Create" }} Doctor
                         </span>
                     </PrimaryButton>
                 </div>
@@ -1760,9 +2055,7 @@ const generatePatientNumber = () => {
                         <span v-if="isEditing"
                             >Last updated:
                             {{
-                                new Date(
-                                    patient.updated_at
-                                ).toLocaleDateString()
+                                new Date(doctor.updated_at).toLocaleDateString()
                             }}</span
                         >
                         <span v-else
@@ -1789,7 +2082,7 @@ const generatePatientNumber = () => {
                                 >{{
                                     isEditing ? "Update" : "Create"
                                 }}
-                                Patient</span
+                                Doctor</span
                             >
                         </PrimaryButton>
                     </div>
@@ -1822,18 +2115,18 @@ const generatePatientNumber = () => {
                 </div>
                 <div class="mt-4 text-center">
                     <h3 class="text-lg font-medium text-gray-900">
-                        Delete Patient Account
+                        Delete Doctor Account
                     </h3>
                     <div class="mt-2">
                         <p class="text-sm text-gray-600">
                             Are you sure you want to delete
                             <span class="font-semibold"
-                                >{{ patient?.title }} {{ patient?.first_name }}
-                                {{ patient?.last_name }}</span
+                                >{{ doctor?.title }} {{ doctor?.first_name }}
+                                {{ doctor?.last_name }}</span
                             >'s account?
                         </p>
                         <p class="text-sm text-red-600 font-medium mt-2">
-                            This action cannot be undone. All patient data will
+                            This action cannot be undone. All doctor data will
                             be permanently removed.
                         </p>
                     </div>

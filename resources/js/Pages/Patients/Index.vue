@@ -502,7 +502,10 @@ const viewPatient = (patientId) => {
                                             class="h-10 w-10 rounded-full overflow-hidden"
                                         >
                                             <img
-                                                :src="patient.profile_image"
+                                                :src="
+                                                    '/storage/' +
+                                                    patient.profile_image
+                                                "
                                                 :alt="patient.name"
                                                 class="h-full w-full object-cover"
                                             />
