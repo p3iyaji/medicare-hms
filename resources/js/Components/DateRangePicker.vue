@@ -299,14 +299,14 @@ function applySelection() {
 </script>
 
 <template>
-    <div class="relative">
+    <div class="relative block w-full">
         <!-- Input Display -->
         <div @click="showCalendar = !showCalendar" class="cursor-pointer">
             <TextInput
                 :modelValue="displayValue"
                 readonly
                 :placeholder="placeholder"
-                class="cursor-pointer"
+                class="cursor-pointer w-full block"
             >
                 <template #suffix>
                     <svg
@@ -329,7 +329,7 @@ function applySelection() {
         <!-- Calendar Dropdown -->
         <div
             v-show="showCalendar"
-            class="absolute z-50 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 p-4 w-64"
+            class="absolute z-50 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 p-4 w-full"
         >
             <div class="flex justify-between items-center mb-4">
                 <button

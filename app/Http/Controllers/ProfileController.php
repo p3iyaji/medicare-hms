@@ -30,9 +30,9 @@ class ProfileController extends Controller
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'profile' => $profile,
             'status' => session('status'),
-            'nationalities'=> $nationalities,
-            'states'=> $states,
-                    
+            'nationalities' => $nationalities,
+            'states' => $states,
+
         ]);
     }
 
@@ -44,30 +44,30 @@ class ProfileController extends Controller
         $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-           
+
 
         ]);
 
         $user = User::find($request->user()->id);
-       
-            $user->title = $request->title;
-            $user->first_name = $request->first_name;
-            $user->middle_name = $request->middle_name;
-            $user->last_name = $request->last_name;
-            $user->date_of_birth  = $request->date_of_birth;
-            $user->gender = $request->gender;
-            $user->user_type = $request->user_type;
-            $user->occupation = $request->occupation;
-            $user->work_address = $request->work_address;   
-            $user->residential_address = $request->residential_address;
-            $user->nationality_id = $request->nationality_id;
-            $user->state_id = $request->state_id;
-            $user->industry = $request->industry;
-            $user->religion = $request->religion;
-            $user->spoken_languages = $request->input('spoken_languages', []);
 
-            $user->update();
-    
+        $user->title = $request->title;
+        $user->first_name = $request->first_name;
+        $user->middle_name = $request->middle_name;
+        $user->last_name = $request->last_name;
+        $user->date_of_birth  = $request->date_of_birth;
+        $user->gender = $request->gender;
+        $user->user_type = $request->user_type;
+        $user->occupation = $request->occupation;
+        $user->work_address = $request->work_address;
+        $user->residential_address = $request->residential_address;
+        $user->nationality_id = $request->nationality_id;
+        $user->state_id = $request->state_id;
+        $user->industry = $request->industry;
+        $user->religion = $request->religion;
+        $user->spoken_languages = $request->input('spoken_languages', []);
+
+        $user->update();
+
 
         //$request->user()->fill($request->validated());
 
@@ -83,13 +83,13 @@ class ProfileController extends Controller
     public function phone(Request $request): RedirectResponse
     {
         $request->validate([
-            'phone' => ['required', 'string',''],
-            ]);
-            $user = User::find($request->user()->id);
-            $user->phone = $request->phone;
-            $user->save();
+            'phone' => ['required', 'string', ''],
+        ]);
+        $user = User::find($request->user()->id);
+        $user->phone = $request->phone;
+        $user->save();
 
-            return Redirect::route('profile.edit');
+        return Redirect::route('profile.edit');
     }
 
     // In your ProfileController.php
@@ -107,7 +107,7 @@ class ProfileController extends Controller
 
             // Store new photo
             $path = $request->file('profile_image')->store('profile-photos', 'public');
-            
+
             // Update user record
             $request->user()->update([
                 'profile_image' => $path,
@@ -123,7 +123,7 @@ class ProfileController extends Controller
     {
         if ($request->user()->profile_image) {
             Storage::disk('public')->delete($request->user()->profile_image);
-            
+
             $request->user()->update([
                 'profile_image' => null,
             ]);
@@ -146,11 +146,11 @@ class ProfileController extends Controller
             'allergies.*' => ['string', 'max:255'],
             'chronic_conditions' => ['nullable', 'array'],
             'chronic_conditions.*' => ['string', 'max:255'],
-            
+
         ]);
 
         $user = Auth::user();
-        
+
         // Update or create medical profile
         $user_profile = UserProfile::where('user_id', $user->id)->first();
         $user_profile->blood_type = $request->blood_type;
@@ -161,7 +161,7 @@ class ProfileController extends Controller
         $user_profile->allergies = $request->input('allergies', []);
         $user_profile->chronic_conditions = $request->input('chronic_conditions', []);
         $user_profile->save();
-       
+
         return back()->with('status', 'Medical profile updated successfully!');
     }
 
@@ -176,9 +176,9 @@ class ProfileController extends Controller
         ]);
 
         $user = Auth::user();
-        
 
-        if($request->same_as_users_address == true) {
+
+        if ($request->same_as_users_address == true) {
             $user_profile = UserProfile::where('user_id', $user->id)->first();
             $user_profile->emergency_contact_name = $request->emergency_contact_name;
             $user_profile->emergency_contact_number = $request->emergency_contact_number;
@@ -191,7 +191,7 @@ class ProfileController extends Controller
             $user_profile->emergency_contact_address = $request->emergency_contact_address;
             $user_profile->save();
         }
-        
+
         // Update or create medical profile
         // UserProfile::updateOrCreate(
         //     ['user_id' => $user->id],
@@ -201,7 +201,7 @@ class ProfileController extends Controller
         //         'emergency_contact_relationship', 
         //         'emergency_contact_address',
         //         'same_as_users_address || auth()->user()->residential_address', 
-                
+
         //     ]));
 
         return back()->with('status', 'Emergency contact updated successfully!');
@@ -215,125 +215,126 @@ class ProfileController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
         // Update or create medical profile
         UserProfile::updateOrCreate(
             ['user_id' => $user->id],
             $request->only([
-                'insurance_provider', 
-                'insurance_policy_number', 
-                
-            ]));
+                'insurance_provider',
+                'insurance_policy_number',
+
+            ])
+        );
 
         return back()->with('status', 'Insurance info updated successfully!');
     }
 
-        /**
+    /**
      * Export user profile as PDF
      */
-   public function exportPdf(Request $request)
-{
-    $user = Auth::user();
-    $profile = $user->profile ?? new UserProfile();
-    
-    // Format data for PDF (same as before)
-    $data = [
-        'user' => [
-            'title' => $user->title,
-            'full_name' => $user->full_name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'date_of_birth' => $user->date_of_birth?->format('F j, Y'),
-            'age' => $user->age,
-            'gender' => $user->gender,
-            'nationality' => $user->nationality?->name,
-            'state' => $user->state?->name,
-            'occupation' => $user->occupation,
-            'work_address' => $user->work_address,
-            'industry' => $user->industry,
-            'ethnic_region' => $user->ethnicRegion?->name,
-            'spoken_languages' => is_array($user->spoken_languages) 
-                ? implode(', ', $user->spoken_languages) 
-                : $user->spoken_languages,
-            'religion' => $user->religion,
-            'region' => $user->region,
-            'county' => $user->county,
-            'district' => $user->district,
-            'residential_address' => $user->residential_address,
-            'user_type' => $user->user_type,
-            'is_verified' => $user->is_verified ? 'Yes' : 'No',
-            'last_login' => $user->last_login_at?->format('F j, Y, g:i A'),
-        ],
-        'medical' => [
-            'blood_type' => $profile->blood_type,
-            'genotype' => $profile->genotype,
-            'height' => $profile->height ? $profile->height . ' cm' : 'Not set',
-            'weight' => $profile->weight ? $profile->weight . ' kg' : 'Not set',
-            'bmi' => $profile->height && $profile->weight 
-                ? round($profile->weight / (($profile->height/100) ** 2), 1) 
-                : 'Not calculable',
-        ],
-        'emergency' => [
-            'contact_name' => $profile->emergency_contact_name,
-            'contact_number' => $profile->emergency_contact_number,
-            'relationship' => $profile->emergency_contact_relationship,
-            'address' => $profile->same_as_users_address 
-                ? 'Same as user address: ' . $user->residential_address
-                : $profile->emergency_contact_address,
-            'same_as_user_address' => $profile->same_as_users_address ? 'Yes' : 'No',
-        ],
-        'insurance' => [
-            'provider' => $profile->insurance_provider,
-            'policy_number' => $profile->insurance_policy_number,
-        ],
-        'health' => [
-            'allergies' => is_array($profile->allergies) 
-                ? implode(', ', $profile->allergies)
-                : ($profile->allergies ?? 'None recorded'),
-            'chronic_conditions' => is_array($profile->chronic_conditions)
-                ? implode(', ', $profile->chronic_conditions)
-                : ($profile->chronic_conditions ?? 'None recorded'),
-        ],
-        'export_date' => now()->format('F j, Y, g:i A'),
-    ];
-    
-    // Generate PDF
-    $pdf = Pdf::loadView('pdf.profile', $data);
-    
-    // Return PDF as download response
-    $filename = 'medical-profile-' . $user->uuid . '-' . now()->format('Y-m-d') . '.pdf';
+    public function exportPdf(Request $request)
+    {
+        $user = Auth::user();
+        $profile = $user->profile ?? new UserProfile();
 
-    return Pdf::loadView('pdf.profile', $data)->download($filename);
-}
+        // Format data for PDF (same as before)
+        $data = [
+            'user' => [
+                'title' => $user->title,
+                'full_name' => $user->full_name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'date_of_birth' => $user->date_of_birth?->format('F j, Y'),
+                'age' => $user->age,
+                'gender' => $user->gender,
+                'nationality' => $user->nationality?->name,
+                'state' => $user->state?->name,
+                'occupation' => $user->occupation,
+                'work_address' => $user->work_address,
+                'industry' => $user->industry,
+                'ethnic_region' => $user->ethnicRegion?->name,
+                'spoken_languages' => is_array($user->spoken_languages)
+                    ? implode(', ', $user->spoken_languages)
+                    : $user->spoken_languages,
+                'religion' => $user->religion,
+                'region' => $user->region,
+                'county' => $user->county,
+                'district' => $user->district,
+                'residential_address' => $user->residential_address,
+                'user_type' => $user->user_type,
+                'is_verified' => $user->is_verified ? 'Yes' : 'No',
+                'last_login' => $user->last_login_at?->format('F j, Y, g:i A'),
+            ],
+            'medical' => [
+                'blood_type' => $profile->blood_type,
+                'genotype' => $profile->genotype,
+                'height' => $profile->height ? $profile->height . ' cm' : 'Not set',
+                'weight' => $profile->weight ? $profile->weight . ' kg' : 'Not set',
+                'bmi' => $profile->height && $profile->weight
+                    ? round($profile->weight / (($profile->height / 100) ** 2), 1)
+                    : 'Not calculable',
+            ],
+            'emergency' => [
+                'contact_name' => $profile->emergency_contact_name,
+                'contact_number' => $profile->emergency_contact_number,
+                'relationship' => $profile->emergency_contact_relationship,
+                'address' => $profile->same_as_users_address
+                    ? 'Same as user address: ' . $user->residential_address
+                    : $profile->emergency_contact_address,
+                'same_as_user_address' => $profile->same_as_users_address ? 'Yes' : 'No',
+            ],
+            'insurance' => [
+                'provider' => $profile->insurance_provider,
+                'policy_number' => $profile->insurance_policy_number,
+            ],
+            'health' => [
+                'allergies' => is_array($profile->allergies)
+                    ? implode(', ', $profile->allergies)
+                    : ($profile->allergies ?? 'None recorded'),
+                'chronic_conditions' => is_array($profile->chronic_conditions)
+                    ? implode(', ', $profile->chronic_conditions)
+                    : ($profile->chronic_conditions ?? 'None recorded'),
+            ],
+            'export_date' => now()->format('F j, Y, g:i A'),
+        ];
 
-/**
- * Export blank medical profile form as PDF
- */
-public function exportBlankForm()
-{
-    $data = [
-        'export_date' => now()->format('F j, Y'),
-        'form_id' => 'MF-' . date('Ymd') . '-' . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT)
-    ];
-    
-    $pdf = Pdf::loadView('pdf.blank-profile-form', $data);
-    
-    return $pdf->download('medical-profile-blank-form-' . date('Y-m-d') . '.pdf');
-}
+        // Generate PDF
+        $pdf = Pdf::loadView('pdf.profile', $data);
 
-/**
- * Export compact blank form (1-page version)
- */
-public function exportCompactBlankForm()
-{
-    $data = [
-        'export_date' => now()->format('F j, Y')
-    ];
-    
-    $pdf = Pdf::loadView('pdf.blank-profile-form-compact', $data);
-    
-    return $pdf->download('medical-profile-quick-form-' . date('Y-m-d') . '.pdf');
-}
+        // Return PDF as download response
+        $filename = 'medical-profile-' . $user->uuid . '-' . now()->format('Y-m-d') . '.pdf';
+
+        return Pdf::loadView('pdf.profile', $data)->download($filename);
+    }
+
+    /**
+     * Export blank medical profile form as PDF
+     */
+    public function exportBlankForm()
+    {
+        $data = [
+            'export_date' => now()->format('F j, Y'),
+            'form_id' => 'MF-' . date('Ymd') . '-' . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT)
+        ];
+
+        $pdf = Pdf::loadView('pdf.blank-profile-form', $data);
+
+        return $pdf->download('medical-profile-blank-form-' . date('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Export compact blank form (1-page version)
+     */
+    public function exportCompactBlankForm()
+    {
+        $data = [
+            'export_date' => now()->format('F j, Y')
+        ];
+
+        $pdf = Pdf::loadView('pdf.blank-profile-form-compact', $data);
+
+        return $pdf->download('medical-profile-quick-form-' . date('Y-m-d') . '.pdf');
+    }
     /**
      * Delete the user's account.
      */

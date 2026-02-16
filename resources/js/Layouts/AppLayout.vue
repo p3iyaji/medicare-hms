@@ -210,6 +210,7 @@
 
             <!-- Main Content Area -->
             <main class="flex-1">
+                <FlashMessage />
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <slot />
                 </div>
@@ -230,6 +231,7 @@ import { ref, computed, onMounted } from "vue";
 import { usePage, router } from "@inertiajs/vue3";
 import DesktopSidebar from "@/Components/DesktopSidebar.vue";
 import MobileSidebar from "@/Components/MobileSidebar.vue";
+import FlashMessage from "@/Components/FlashMessage.vue";
 
 const props = defineProps({
     title: String,
@@ -270,21 +272,21 @@ const navigation = computed(() => {
                 current: window.location.pathname.startsWith("/appointments"),
                 visible: true,
             },
-            {
-                name: "Medical Records",
-                href: "/medical-records",
-                icon: "DocumentTextIcon",
-                current:
-                    window.location.pathname.startsWith("/medical-records"),
-                visible: true,
-            },
+            // {
+            //     name: "Medical Records",
+            //     href: "/medical-records",
+            //     icon: "DocumentTextIcon",
+            //     current:
+            //         window.location.pathname.startsWith("/medical-records"),
+            //     visible: true,
+            // },
             {
                 name: "Billing",
                 href: "/billing",
                 icon: "CreditCardIcon",
                 current: window.location.pathname.startsWith("/billing"),
                 visible: true,
-            }
+            },
         );
     }
 
@@ -298,27 +300,37 @@ const navigation = computed(() => {
                 visible: true,
             },
             {
-                name: "Appointments",
+                name: "My Appointments",
+                href: "/doctor/appointments",
+                icon: "CalendarIcon",
+                current: window.location.pathname.startsWith(
+                    "/doctor/appointments",
+                ),
+                visible: true,
+            },
+            {
+                name: "All Appointments",
                 href: "/appointments",
                 icon: "CalendarIcon",
                 current: window.location.pathname.startsWith("/appointments"),
                 visible: true,
             },
-            {
-                name: "Medical Records",
-                href: "/medical-records",
-                icon: "DocumentTextIcon",
-                current:
-                    window.location.pathname.startsWith("/medical-records"),
-                visible: true,
-            },
+
+            // {
+            //     name: "Medical Records",
+            //     href: "/medical-records",
+            //     icon: "DocumentTextIcon",
+            //     current:
+            //         window.location.pathname.startsWith("/medical-records"),
+            //     visible: true,
+            // },
             {
                 name: "Profile Forms",
                 href: "/profile/forms",
                 icon: "DocumentDownloadIcon",
                 current: window.location.pathname.startsWith("/profile/forms"),
                 visible: true,
-            } // NEW
+            }, // NEW
         );
     }
 
@@ -358,13 +370,29 @@ const navigation = computed(() => {
                 visible: true,
             },
             {
-                name: "Medical Records",
-                href: "/medical-records",
-                icon: "DocumentTextIcon",
-                current:
-                    window.location.pathname.startsWith("/medical-records"),
+                name: "Doctor\'s Appointments",
+                href: "/doctor/appointments",
+                icon: "CalendarIcon",
+                current: window.location.pathname.startsWith(
+                    "/doctor/appointments",
+                ),
                 visible: true,
             },
+            {
+                name: "Patient Notes",
+                href: "/patient-notes",
+                icon: "PencilAltIcon",
+                current: window.location.pathname.startsWith("/patient-notes"),
+                visible: true,
+            },
+            // {
+            //     name: "Medical Records",
+            //     href: "/medical-records",
+            //     icon: "DocumentTextIcon",
+            //     current:
+            //         window.location.pathname.startsWith("/medical-records"),
+            //     visible: true,
+            // },
             {
                 name: "Reports",
                 href: "/reports",
@@ -402,7 +430,7 @@ const navigation = computed(() => {
                 icon: "DocumentDownloadIcon",
                 current: window.location.pathname.startsWith("/profile/forms"),
                 visible: true,
-            } // NEW
+            }, // NEW
         );
     }
 

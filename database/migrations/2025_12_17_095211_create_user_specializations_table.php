@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('user_specializations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('specialization_id')->constrained('specializations')->onDelete('cascade');
             $table->integer('years_of_experience')->default(0);
             $table->string('certification_number', 100)->nullable();

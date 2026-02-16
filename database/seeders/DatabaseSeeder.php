@@ -27,15 +27,17 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesAndPermissionsSeeder::class);
         User::factory()->create([
             'first_name' => 'Paul',
-            'last_name'=> 'Iyaji',
-            'email'=> 'p3.iyaji@gmail.com',
-            'password'=> bcrypt('nano1234'),
-            'user_type'=> 'admin',
-            'email_verified_at'=> now(),
-            'phone'=> '+447859959495',
-            'phone_verified_at'=> now(),
-            'is_active'=> true,
-            'is_verified'=> true,
-        ])->assignRole('Admin');
+            'last_name' => 'Iyaji',
+            'email' => 'p3.iyaji@gmail.com',
+            'password' => bcrypt('nano1234'),
+            'user_type' => 'admin',
+            'email_verified_at' => now(),
+            'phone' => '+447859959495',
+            'phone_verified_at' => now(),
+            'is_active' => true,
+            'is_verified' => true,
+        ])->assignRole('admin');
+
+        //$this->call(AppointmentSeeder::class);
     }
 }

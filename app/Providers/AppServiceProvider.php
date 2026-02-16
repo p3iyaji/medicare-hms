@@ -6,10 +6,20 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
+use App\Observers\UserObserver;
+use App\Observers\AppointmentObserver;
+use App\Models\Appointment;
+use App\Policies\AppointmentPolicy;
+use App\Models\NoteTemplate;
+use App\Policies\NoteTemplatePolicy;
 use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
+    protected $policies = [
+        Appointment::class => AppointmentPolicy::class,
+        NoteTemplate::class => NoteTemplatePolicy::class,
+    ];
     /**
      * Register any application services.
      */
@@ -23,6 +33,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Gate::policy(Appointment::class, AppointmentPolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(NoteTemplate::class, NoteTemplatePolicy::class);
+
         Inertia::share([
             // Authentication data
             'auth' => function () {
@@ -228,6 +241,9 @@ class AppServiceProvider extends ServiceProvider
                 return csrf_token();
             },
         ]);
+
+        User::observe(UserObserver::class);
+        Appointment::observe(AppointmentObserver::class);
     }
 
     /**

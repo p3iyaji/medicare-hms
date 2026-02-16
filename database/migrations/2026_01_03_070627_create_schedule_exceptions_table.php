@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('schedule_exceptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('doctor_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('doctor_id')->constrained('users')->onDelete('cascade');
             $table->date('exception_date')->nullable();;
             $table->longText('reason')->nullable();
             $table->boolean('is_available')->default(false);
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
-            
         });
     }
 

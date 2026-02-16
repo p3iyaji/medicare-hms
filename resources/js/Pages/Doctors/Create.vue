@@ -87,10 +87,10 @@ const showPassword = ref(false);
 
 const isEditing = computed(() => props.doctor !== null);
 const pageTitle = computed(() =>
-    isEditing.value ? "Edit Doctor" : "Create New Doctor"
+    isEditing.value ? "Edit Doctor" : "Create New Doctor",
 );
 const pageSubtitle = computed(() =>
-    isEditing.value ? "Update doctor information" : "Register a new doctor"
+    isEditing.value ? "Update doctor information" : "Register a new doctor",
 );
 
 const doctorSpecializations = ref(
@@ -98,7 +98,7 @@ const doctorSpecializations = ref(
         specialization_id: spec.id,
         years_of_experience: spec.pivot?.years_of_experience || "",
         certification_number: spec.pivot?.certification_number || "",
-    })) || []
+    })) || [],
 );
 
 const form = useForm({
@@ -192,7 +192,8 @@ const addSpecialization = () => {
     }
     const exists = doctorSpecializations.value.some(
         (spec) =>
-            spec.specialization_id === newSpecialization.value.specialization_id
+            spec.specialization_id ===
+            newSpecialization.value.specialization_id,
     );
 
     if (exists) {
@@ -308,7 +309,7 @@ watch(
         if (value) {
             form.emergency_contact_address = form.residential_address;
         }
-    }
+    },
 );
 
 // Form submission
@@ -389,31 +390,7 @@ const generateDoctorNumber = () => {
 
 <template>
     <AppLayout :title="pageTitle" :subtitle="pageSubtitle">
-        <template #headerActions>
-            <div class="flex flex-wrap gap-2">
-                <SecondaryButton @click="handleCancel" class="mr-2">
-                    <span class="hidden sm:inline">Cancel</span>
-                    <span class="sm:hidden">←</span>
-                </SecondaryButton>
-                <PrimaryButton @click="submitForm" :disabled="form.processing">
-                    <span v-if="form.processing">Saving...</span>
-                    <span v-else>
-                        <span class="hidden sm:inline">{{
-                            isEditing ? "Update" : "Create"
-                        }}</span>
-                        <span class="sm:hidden">✓</span>
-                    </span>
-                </PrimaryButton>
-                <DangerButton
-                    v-if="isEditing"
-                    @click="showDeleteModal = true"
-                    class="ml-2"
-                >
-                    <span class="hidden sm:inline">Delete</span>
-                    <span class="sm:hidden">🗑️</span>
-                </DangerButton>
-            </div>
-        </template>
+        <template #headerActions> </template>
 
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <!-- Doctor Number Display -->
@@ -967,7 +944,7 @@ const generateDoctorNumber = () => {
                                             :value="language"
                                             :checked="
                                                 form.spoken_languages.includes(
-                                                    language
+                                                    language,
                                                 )
                                             "
                                             @change="toggleLanguage(language)"
@@ -1235,12 +1212,12 @@ const generateDoctorNumber = () => {
                                                     'Underweight'
                                                         ? 'bg-yellow-100 text-yellow-800'
                                                         : bmiCategory ===
-                                                          'Normal'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : bmiCategory ===
-                                                          'Overweight'
-                                                        ? 'bg-orange-100 text-orange-800'
-                                                        : 'bg-red-100 text-red-800',
+                                                            'Normal'
+                                                          ? 'bg-green-100 text-green-800'
+                                                          : bmiCategory ===
+                                                              'Overweight'
+                                                            ? 'bg-orange-100 text-orange-800'
+                                                            : 'bg-red-100 text-red-800',
                                                 ]"
                                             >
                                                 {{ bmiCategory }}
@@ -1713,7 +1690,7 @@ const generateDoctorNumber = () => {
                                                     specializations.find(
                                                         (s) =>
                                                             s.id ==
-                                                            spec.specialization_id
+                                                            spec.specialization_id,
                                                     )?.name || "Unknown"
                                                 }}
                                             </h5>

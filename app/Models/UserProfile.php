@@ -5,22 +5,28 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
+
 
 class UserProfile extends Model
 {
     use HasFactory;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+
     protected $fillable = [
         'user_id',
         'blood_type',
-        'genotype', 
+        'genotype',
         'height',
         'weight',
         'emergency_contact_name',
         'emergency_contact_number',
         'emergency_contact_relationship',
-        'emergency_contact_address', 
-        'same_as_users_address', 
+        'emergency_contact_address',
+        'same_as_users_address',
         'primary_physician_id',
         'insurance_provider',
         'insurance_policy_number',
@@ -28,10 +34,18 @@ class UserProfile extends Model
         'chronic_conditions'
     ];
 
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->id = Str::uuid();
+        });
+    }
+
     protected $casts = [
         'height' => 'decimal:2',
         'weight' => 'decimal:2',
-        'same_as_users_address' => 'boolean', 
+        'same_as_users_address' => 'boolean',
         'allergies' => 'array',
         'chronic_conditions' => 'array',
         'created_at' => 'datetime',
@@ -49,11 +63,11 @@ class UserProfile extends Model
     }
 
     public function getEmergencyAddressAttribute()
-{
-    if ($this->same_as_users_address && $this->user) {
-        return $this->user->address; // Assuming user has an address field
+    {
+        if ($this->same_as_users_address && $this->user) {
+            return $this->user->address; // Assuming user has an address field
+        }
+
+        return $this->emergency_contact_address;
     }
-    
-    return $this->emergency_contact_address;
-}
 }

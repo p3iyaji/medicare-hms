@@ -13,6 +13,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class PatientController extends Controller
@@ -27,57 +28,70 @@ class PatientController extends Controller
             abort(403, 'Unauthorized action!');
         }
 
-        $query = User::where('user_type', 'patient')
-            ->with('nationality', 'state')
-            ->latest();
+        $version = Cache::store('redis')->get('patients:version', 1);
 
-        // Apply filters
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('uuid', 'like', "%{$search}%");
-            });
-        }
+        $filters = collect($request->only([
+            'search',
+            'status',
+            'gender',
+            'verified',
+            'date_range',
+            'page',
+        ]))->sortKeys()->toArray();
 
-        if ($request->filled('status')) {
-            if ($request->status === 'inactive') {
-                $query->where('is_active', '=', 0);
-            } else if ($request->status === 'active') {
-                $query->where('is_active', '=', 1);
-            }
-        }
+        $cacheKey = "patients:index:user:{$user->user_type}:v{$version}:" . md5(json_encode($filters));
 
-        if ($request->filled('gender')) {
-            $query->where('gender', '=', $request->gender);
-        }
+        $patients = Cache::store('redis')->remember(
+            $cacheKey,
+            now()->addMinutes(5), // TTL
+            function () use ($request) {
 
-        if ($request->filled('verified')) {
-            if ($request->verified === 'unverified') {
-                $query->where('is_verified', '=', 0);
-            } else if ($request->verified === 'verified') {
-                $query->where('is_verified', '=', 1);
-            }
-        }
+                $query = User::where('user_type', 'patient')
+                    ->with('nationality:id,name', 'state:id,name')
+                    ->latest();
 
-        if ($request->filled('date_range')) {
-            $dates = explode(' to ', $request->date_range);
-            if (count($dates) === 2) {
-                try {
-                    $startDate = Carbon::parse(trim($dates[0]))->startOfDay();
-                    $endDate = Carbon::parse(trim($dates[1]))->endOfDay();
-                    $query->whereBetween('created_at', [$startDate, $endDate]);
-                } catch (\Exception $e) {
-                    // Log error or handle invalid date format
-                    Log::error('Invalid date range format: ' . $request->date_range);
+                // Search
+                if ($request->filled('search')) {
+                    $search = $request->search;
+                    $query->where(function ($q) use ($search) {
+                        $q->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%")
+                            ->orWhere('uuid', 'like', "%{$search}%");
+                    });
                 }
-            }
-        }
 
-        $patients = $query->paginate(100)->withQueryString();
+                // Status
+                if ($request->filled('status')) {
+                    $query->where('is_active', $request->status === 'active');
+                }
+
+                // Gender
+                if ($request->filled('gender')) {
+                    $query->where('gender', $request->gender);
+                }
+
+                // Verification
+                if ($request->filled('verified')) {
+                    $query->where('is_verified', $request->verified === 'verified');
+                }
+
+                // Date range
+                if ($request->filled('date_range')) {
+                    $dates = explode(' to ', $request->date_range);
+                    if (count($dates) === 2) {
+                        $query->whereBetween('created_at', [
+                            Carbon::parse(trim($dates[0]))->startOfDay(),
+                            Carbon::parse(trim($dates[1]))->endOfDay(),
+                        ]);
+                    }
+                }
+
+                return $query->paginate(100)->withQueryString();
+            }
+        );
+
 
         $dateRangeOptions = [
             'today' => 'Today',
@@ -98,7 +112,17 @@ class PatientController extends Controller
         ]);
     }
 
-
+    private function patientCacheKey(Request $request): string
+    {
+        return 'patients:' . md5(json_encode([
+            'search'     => $request->search,
+            'status'     => $request->status,
+            'gender'     => $request->gender,
+            'verified'   => $request->verified,
+            'date_range' => $request->date_range,
+            'page'       => $request->page ?? 1,
+        ]));
+    }
     public function create()
     {
         /** @var User $user */
@@ -213,7 +237,7 @@ class PatientController extends Controller
 
     public function update(Request $request, User $patient)
     {
-       
+
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',

@@ -16,7 +16,7 @@ const props = defineProps({
 });
 
 const bloodtypes = computed(() => usePage().props.medical.blood_types);
-const genotypes = computed(() => usePage().props.genotypes);
+const genotypes = computed(() => usePage().props.medical.genotypes);
 const emit = defineEmits(["updated"]);
 
 const isEditing = ref(false);

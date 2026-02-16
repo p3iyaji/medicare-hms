@@ -12,15 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_profiles', function (Blueprint $table) {
-            $table->id();
-
-            $table->foreignId('user_id')
+            $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')
                 ->unique()
                 ->constrained()
                 ->cascadeOnDelete();
 
             $table->enum('blood_type', [
-                'A+','A-','B+','B-','AB+','AB-','O+','O-'
+                'A+',
+                'A-',
+                'B+',
+                'B-',
+                'AB+',
+                'AB-',
+                'O+',
+                'O-'
             ])->nullable();
 
             $table->enum('genotype', ['AA', 'AS', 'AC', 'SS', 'SC', 'CC'])->nullable();

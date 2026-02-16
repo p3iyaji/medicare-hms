@@ -49,12 +49,11 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string|max:20|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            
+
         ]);
 
-       $user = DB::transaction(function () use ($request) {
+        $user = DB::transaction(function () use ($request) {
             $user = User::create([
-                'uuid' => Str::uuid()->toString(),
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'password' => Hash::make($request->password),

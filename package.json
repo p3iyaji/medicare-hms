@@ -23,7 +23,7 @@
         "@headlessui/vue": "^1.7.23",
         "@heroicons/vue": "^2.2.0",
         "@vueuse/core": "^14.1.0",
-        "apexcharts": "^5.3.6",
+        "apexcharts": "^5.4.0",
         "chart.js": "^3.9.1",
         "date-fns": "^4.1.0",
         "lodash": "^4.17.21",

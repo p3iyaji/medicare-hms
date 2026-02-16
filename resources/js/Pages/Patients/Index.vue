@@ -2,7 +2,7 @@
 import { router, usePage } from "@inertiajs/vue3";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { computed, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import SelectInput from "@/Components/SelectInput.vue";
@@ -10,6 +10,13 @@ import Modal from "@/Components/Modal.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import DateRangePicker from "@/Components/DateRangePicker.vue";
 import DangerButton from "@/Components/DangerButton.vue";
+import {
+    EyeIcon,
+    ClipboardDocumentListIcon,
+    PauseCircleIcon,
+    PlayCircleIcon,
+    TrashIcon,
+} from "@heroicons/vue/24/outline";
 
 const props = defineProps({
     patients: {
@@ -31,11 +38,42 @@ const props = defineProps({
 const page = usePage();
 const auth = computed(() => page.props.auth || { user: null });
 
+const lastVersion = ref(null);
+let timer = null;
+let interval = 4000;
+
+const pollVersion = async () => {
+    const res = await fetch("/patients/version");
+    const data = await res.json();
+
+    if (data.version > lastVersion.value) {
+        interval = 4000; // active = fast refresh
+        router.reload({ only: ["patients"], preserveScroll: true });
+    } else {
+        interval = Math.min(interval + 2000, 15000); // slow down when nothing changes
+    }
+
+    clearInterval(timer);
+    timer = setInterval(pollVersion, interval);
+};
+
+onMounted(() => {
+    timer = setInterval(pollVersion, 4000); //every 4s
+});
+
+onBeforeUnmount(() => {
+    if (timer) clearInterval(timer);
+});
+
 const genders = computed(() => page.props.medical.genders);
 
 const welcomeMessage = computed(() => {
     return "Manage patient records and accounts";
 });
+
+const canManagePatients = computed(() =>
+    ["admin", "doctor"].includes(page.props.auth?.user?.user_type),
+);
 
 const createPatient = () => {
     router.visit("/patients/create");
@@ -108,7 +146,7 @@ const applyFilters = () => {
                 replace: true,
                 preserveScroll: true,
                 only: ["patients", "filters"],
-            }
+            },
         );
     }, 300); // 300ms debounce
 };
@@ -133,7 +171,7 @@ watch(
     () => {
         applyFilters();
     },
-    { deep: true }
+    { deep: true },
 );
 
 const clearFilters = () => {
@@ -177,7 +215,7 @@ const confirmDeactivate = async () => {
                 onFinish: () => {
                     processingAction.value = false;
                 },
-            }
+            },
         );
     } catch (error) {
         processingAction.value = false;
@@ -201,7 +239,7 @@ const confirmActivate = async () => {
                 onFinish: () => {
                     processingAction.value = false;
                 },
-            }
+            },
         );
     } catch (error) {
         processingAction.value = false;
@@ -239,6 +277,10 @@ const formatDate = (date) => {
 
 const viewPatient = (patientId) => {
     router.visit(`/patients/edit/${patientId}`);
+};
+
+const viewMedicalRecord = (patient) => {
+    router.visit(`/patients/${patient.id}/medical-record`);
 };
 </script>
 
@@ -371,7 +413,7 @@ const viewPatient = (patientId) => {
                             >
                                 {{
                                     statusOptions.find(
-                                        (o) => o.value === statusFilter
+                                        (o) => o.value === statusFilter,
                                     )?.label
                                 }}
                                 <button
@@ -403,7 +445,7 @@ const viewPatient = (patientId) => {
                             >
                                 {{
                                     verifiedOptions.find(
-                                        (o) => o.value === verifiedFilter
+                                        (o) => o.value === verifiedFilter,
                                     )?.label
                                 }}
                                 <button
@@ -610,43 +652,55 @@ const viewPatient = (patientId) => {
                             </td>
 
                             <!-- Actions -->
-                            <td
-                                class="px-6 py-4 whitespace-nowrap text-sm font-medium"
-                            >
-                                <div class="flex items-center space-x-2">
+                            <td class="px-3 py-2 text-sm font-medium">
+                                <div class="flex items-center gap-1.5">
+                                    <!-- View -->
                                     <button
                                         @click="viewPatient(patient.id)"
-                                        class="text-blue-600 hover:text-blue-900"
+                                        class="p-1.5 rounded hover:bg-blue-50 text-blue-600"
+                                        title="View patient"
                                     >
-                                        View
+                                        <EyeIcon class="w-4 h-4" />
                                     </button>
 
-                                    <template
-                                        v-if="
-                                            auth.user?.user_type === 'admin' ||
-                                            auth.user?.user_type === 'doctor'
-                                        "
-                                    >
+                                    <template v-if="canManagePatients">
+                                        <!-- Medical Record -->
                                         <button
-                                            @click="handleDeactivate(patient)"
-                                            v-if="patient.is_active"
-                                            class="text-yellow-600 hover:text-yellow-900"
+                                            @click="viewMedicalRecord(patient)"
+                                            class="p-1.5 rounded hover:bg-indigo-50 text-indigo-600"
+                                            title="Medical record"
                                         >
-                                            Deactivate
+                                            <ClipboardDocumentListIcon
+                                                class="w-4 h-4"
+                                            />
                                         </button>
+
+                                        <!-- Activate / Deactivate -->
                                         <button
-                                            @click="handleActivate(patient)"
-                                            v-else
-                                            class="text-green-600 hover:text-green-900"
+                                            v-if="patient.is_active"
+                                            @click="handleDeactivate(patient)"
+                                            class="p-1.5 rounded hover:bg-yellow-50 text-yellow-600"
+                                            title="Deactivate patient"
                                         >
-                                            Activate
+                                            <PauseCircleIcon class="w-4 h-4" />
                                         </button>
 
                                         <button
-                                            @click="handleDelete(patient)"
-                                            class="text-red-600 hover:text-red-900"
+                                            v-else
+                                            @click="handleActivate(patient)"
+                                            class="p-1.5 rounded hover:bg-green-50 text-green-600"
+                                            title="Activate patient"
                                         >
-                                            Delete
+                                            <PlayCircleIcon class="w-4 h-4" />
+                                        </button>
+
+                                        <!-- Delete -->
+                                        <button
+                                            @click="handleDelete(patient)"
+                                            class="p-1.5 rounded hover:bg-red-50 text-red-600"
+                                            title="Delete patient"
+                                        >
+                                            <TrashIcon class="w-4 h-4" />
                                         </button>
                                     </template>
                                 </div>

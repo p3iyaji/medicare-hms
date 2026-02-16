@@ -12,6 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\Permission\Traits\HasRoles;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 
 /**
@@ -21,6 +22,9 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
     use LogsActivity;
+
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
@@ -109,11 +113,25 @@ class User extends Authenticatable
         parent::boot();
 
         static::creating(function ($user) {
-            if (empty($user->uuid)) {
-                $user->uuid = \Illuminate\Support\Str::uuid()->toString();
-            }
+            $user->id = Str::uuid();
         });
     }
+
+    // MOVED TO OBSERVER AND REGISTERED IN BOOT METHOD OF THE SERVICEPROVIDER CLASS
+    // protected static function booted()
+    // {
+    //     static::saved(function ($user) {
+    //         if ($user->user_type === 'patient') {
+    //             Cache::flush();
+    //         }
+    //     });
+
+    //     static::deleted(function ($user) {
+    //         if ($user->user_type === 'patient') {
+    //             Cache::flush();
+    //         }
+    //     });
+    // }
 
     // Relationships
     public function nationality()
@@ -143,6 +161,24 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function patientAppointments()
+    {
+        return $this->hasMany(Appointment::class, 'patient_id');
+    }
+
+    public function doctorAppointments()
+    {
+        return $this->hasMany(Appointment::class, 'doctor_id');
+    }
+
+    public function vitalSigns()
+    {
+        return $this->hasMany(VitalSign::class);
+    }
+
+
+    // relationships ends here
+
     public function loginAttempts()
     {
         return $this->hasMany(LoginAttempt::class);
@@ -156,6 +192,11 @@ class User extends Authenticatable
     public function patients()
     {
         return $this->hasMany(UserProfile::class, 'primary_physician_id');
+    }
+
+    public function vitalSignsRecorder()
+    {
+        return $this->belongsTo(VitalSign::class, 'recorded_by');
     }
 
     // Proper attribute getter
