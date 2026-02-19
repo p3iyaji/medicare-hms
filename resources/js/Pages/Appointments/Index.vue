@@ -369,16 +369,19 @@ const getBMICategory = (bmi) => {
 <template>
     <AppLayout title="Appointments Management" :subtitle="welcomeMessage">
         <template #headerActions>
-            <PrimaryButton
-                v-if="
-                    auth.user?.user_type === 'admin' ||
-                    auth.user?.user_type === 'doctor' ||
-                    auth.user?.user_type === 'nurse'
-                "
-                @click="createAppointment"
-            >
-                Add New Appointment
-            </PrimaryButton>
+            <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <PrimaryButton
+                    v-if="
+                        auth.user?.user_type === 'admin' ||
+                        auth.user?.user_type === 'doctor' ||
+                        auth.user?.user_type === 'nurse'
+                    "
+                    @click="createAppointment"
+                    class="w-full sm:w-auto text-center"
+                >
+                    Add New Appointment
+                </PrimaryButton>
+            </div>
         </template>
 
         <!-- Filters section -->

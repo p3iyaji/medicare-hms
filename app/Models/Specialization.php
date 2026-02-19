@@ -17,9 +17,10 @@ class Specialization extends Model
 
     public function users(): BelongsToMany
     {
+
         return $this->belongsToMany(User::class, 'user_specializations')
-                    ->withPivot('years_of_experience', 'certification_number')
-                    ->withTimestamps();
+            ->withPivot('years_of_experience', 'certification_number')
+            ->withTimestamps();
     }
 
     public function doctors()

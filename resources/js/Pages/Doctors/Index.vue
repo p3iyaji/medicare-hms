@@ -108,7 +108,7 @@ const applyFilters = () => {
                 replace: true,
                 preserveScroll: true,
                 only: ["Doctors", "filters"],
-            }
+            },
         );
     }, 300); // 300ms debounce
 };
@@ -133,7 +133,7 @@ watch(
     () => {
         applyFilters();
     },
-    { deep: true }
+    { deep: true },
 );
 
 const clearFilters = () => {
@@ -177,7 +177,7 @@ const confirmDeactivate = async () => {
                 onFinish: () => {
                     processingAction.value = false;
                 },
-            }
+            },
         );
     } catch (error) {
         processingAction.value = false;
@@ -201,7 +201,7 @@ const confirmActivate = async () => {
                 onFinish: () => {
                     processingAction.value = false;
                 },
-            }
+            },
         );
     } catch (error) {
         processingAction.value = false;
@@ -371,7 +371,7 @@ const viewDoctor = (doctorId) => {
                             >
                                 {{
                                     statusOptions.find(
-                                        (o) => o.value === statusFilter
+                                        (o) => o.value === statusFilter,
                                     )?.label
                                 }}
                                 <button
@@ -403,7 +403,7 @@ const viewDoctor = (doctorId) => {
                             >
                                 {{
                                     verifiedOptions.find(
-                                        (o) => o.value === verifiedFilter
+                                        (o) => o.value === verifiedFilter,
                                     )?.label
                                 }}
                                 <button

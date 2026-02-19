@@ -287,16 +287,37 @@ const viewMedicalRecord = (patient) => {
 <template>
     <AppLayout title="Patients Management" :subtitle="welcomeMessage">
         <template #headerActions>
-            <PrimaryButton
-                v-if="
-                    auth.user?.user_type === 'admin' ||
-                    auth.user?.user_type === 'doctor' ||
-                    auth.user?.user_type === 'nurse'
-                "
-                @click="createPatient"
-            >
-                Add New Patient
-            </PrimaryButton>
+            <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <PrimaryButton
+                    v-if="
+                        auth.user?.user_type === 'admin' ||
+                        auth.user?.user_type === 'doctor' ||
+                        auth.user?.user_type === 'nurse'
+                    "
+                    @click="createPatient"
+                    class="w-full sm:w-auto text-center"
+                >
+                    Add New Patient
+                </PrimaryButton>
+            </div>
+        </template>
+        <template>
+            <!-- Your main layout -->
+            <div class="flex flex-col">
+                <!-- Header with actions -->
+                <div
+                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4"
+                >
+                    <h1 class="text-xl font-semibold">Patients</h1>
+
+                    <!-- This is where your slot is being used -->
+                    <slot name="headerActions">
+                        <!-- Your button will appear here -->
+                    </slot>
+                </div>
+
+                <!-- Rest of your content -->
+            </div>
         </template>
 
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">

@@ -22,7 +22,7 @@ class DoctorController extends Controller
             abort(403, "Unauthorized action.");
         }
 
-        $doctors = User::where('user_type', 'doctor')->with('specializations')->paginate(10);
+        $doctors = User::where('user_type', 'doctor')->with('specializations:id,name')->paginate(10);
 
         return inertia('Doctors/Index', [
             'doctors' => $doctors,
@@ -44,7 +44,7 @@ class DoctorController extends Controller
         ]);
     }
 
-        public function edit($id)
+    public function edit($id)
     {
         /** @var User $user */
         $user = Auth::user();
@@ -137,11 +137,9 @@ class DoctorController extends Controller
         ]);
 
         // if specialization data is provided
-        if ($request->has('specializations_data') && is_array($request->specializations_data)) 
-        {
+        if ($request->has('specializations_data') && is_array($request->specializations_data)) {
             $specializationsData = [];
-            foreach ($request->specializations_data as $spec) 
-            {
+            foreach ($request->specializations_data as $spec) {
                 $specializationsData[$spec['specialization_id']] = [
                     'years_of_experience' => $spec['years_of_experience'] ?? null,
                     'certification_number' => $spec['certification_number'] ?? null,
@@ -155,7 +153,7 @@ class DoctorController extends Controller
 
     public function update(Request $request, User $doctor)
     {
-       
+
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -193,11 +191,9 @@ class DoctorController extends Controller
         }
 
         // if specialization data is provided
-        if ($request->has('specializations_data') && is_array($request->specializations_data)) 
-        {
+        if ($request->has('specializations_data') && is_array($request->specializations_data)) {
             $specializationsData = [];
-            foreach ($request->specializations_data as $spec) 
-            {
+            foreach ($request->specializations_data as $spec) {
                 $specializationsData[$spec['specialization_id']] = [
                     'years_of_experience' => $spec['years_of_experience'] ?? null,
                     'certification_number' => $spec['certification_number'] ?? null,

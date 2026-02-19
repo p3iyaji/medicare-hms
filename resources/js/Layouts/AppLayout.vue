@@ -189,21 +189,39 @@
             <!-- Page Header -->
             <header class="bg-white shadow-sm border-b border-gray-200">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h1 class="text-2xl font-semibold text-gray-900">
-                                {{ title }}
-                            </h1>
-                            <p
-                                v-if="subtitle"
-                                class="mt-1 text-sm text-gray-600"
+                    <div class="space-y-4 sm:space-y-0">
+                        <div
+                            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                        >
+                            <!-- Header Title Section -->
+                            <div class="flex-1 min-w-0">
+                                <h1
+                                    class="text-xl sm:text-2xl font-semibold text-gray-900 break-words sm:truncate"
+                                >
+                                    {{ title }}
+                                </h1>
+                                <p
+                                    v-if="subtitle"
+                                    class="mt-1 text-sm text-gray-600 break-words"
+                                >
+                                    {{ subtitle }}
+                                </p>
+                            </div>
+
+                            <!-- Actions Section - Stack vertically on mobile -->
+                            <div
+                                class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto"
                             >
-                                {{ subtitle }}
-                            </p>
+                                <!-- Each action button will be full width on mobile -->
+                                <slot name="headerActions"></slot>
+                            </div>
                         </div>
-                        <div class="flex space-x-3">
-                            <slot name="headerActions"></slot>
-                        </div>
+
+                        <!-- Optional: Add a divider for better visual separation on mobile -->
+                        <hr
+                            class="sm:hidden border-gray-200"
+                            v-if="$slots.headerActions"
+                        />
                     </div>
                 </div>
             </header>
@@ -272,14 +290,7 @@ const navigation = computed(() => {
                 current: window.location.pathname.startsWith("/appointments"),
                 visible: true,
             },
-            // {
-            //     name: "Medical Records",
-            //     href: "/medical-records",
-            //     icon: "DocumentTextIcon",
-            //     current:
-            //         window.location.pathname.startsWith("/medical-records"),
-            //     visible: true,
-            // },
+
             {
                 name: "Billing",
                 href: "/billing",
@@ -316,14 +327,6 @@ const navigation = computed(() => {
                 visible: true,
             },
 
-            // {
-            //     name: "Medical Records",
-            //     href: "/medical-records",
-            //     icon: "DocumentTextIcon",
-            //     current:
-            //         window.location.pathname.startsWith("/medical-records"),
-            //     visible: true,
-            // },
             {
                 name: "Profile Forms",
                 href: "/profile/forms",
@@ -378,21 +381,7 @@ const navigation = computed(() => {
                 ),
                 visible: true,
             },
-            {
-                name: "Patient Notes",
-                href: "/patient-notes",
-                icon: "PencilAltIcon",
-                current: window.location.pathname.startsWith("/patient-notes"),
-                visible: true,
-            },
-            // {
-            //     name: "Medical Records",
-            //     href: "/medical-records",
-            //     icon: "DocumentTextIcon",
-            //     current:
-            //         window.location.pathname.startsWith("/medical-records"),
-            //     visible: true,
-            // },
+
             {
                 name: "Reports",
                 href: "/reports",

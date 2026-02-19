@@ -13,7 +13,7 @@ class DoctorScheduleController extends Controller
     {
 
 
-        $query = DoctorSchedule::with('user')
+        $query = DoctorSchedule::with('user:id,first_name,last_name,email,phone')
             ->orderByRaw("
                 CASE day_of_week
                     WHEN 'Monday' THEN 1
@@ -25,7 +25,7 @@ class DoctorScheduleController extends Controller
                     WHEN 'Sunday' THEN 7
                 END
             ");
-            
+
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
