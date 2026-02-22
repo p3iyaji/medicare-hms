@@ -40,7 +40,7 @@ return new class extends Migration
             $table->longText('emergency_contact_address')->nullable();
             $table->boolean('same_as_users_address')->nullable();
 
-            $table->foreignId('primary_physician_id')
+            $table->foreignUuid('primary_physician_id')
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();

@@ -1,0 +1,57 @@
+# version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: medicals_app
+    volumes:
+      - .:/var/www
+    networks:
+      - medicals
+    depends_on:
+      - mysql
+      - redis
+
+  nginx:
+    image: nginx:stable
+    container_name: medicals_nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - medicals
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: medicals_mysql
+    environment:
+      MYSQL_DATABASE: medicals
+      MYSQL_ROOT_PASSWORD: nova123
+      MYSQL_USER: pauladm
+      MYSQL_PASSWORD: pauladm
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - medicals
+
+  redis:
+    image: redis:alpine
+    container_name: medicals_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - medicals
+
+networks:
+  medicals:
+
+volumes:
+  mysql_data:
