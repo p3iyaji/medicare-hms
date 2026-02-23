@@ -1,0 +1,87 @@
+# version: "3.9"
+
+services:
+  # ------------------------------
+  # Traefik (Reverse Proxy + HTTPS)
+  # ------------------------------
+  traefik:
+    image: traefik:v3.1
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=p3.iyaji@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    networks:
+      - web
+
+  # ------------------------------
+  # Laravel Application
+  # ------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+      - redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.laravel.rule=Host(`nova.realpayglobal.com`)"
+      - "traefik.http.routers.laravel.entrypoints=websecure"
+      - "traefik.http.routers.laravel.tls.certresolver=myresolver"
+
+      # HTTP → HTTPS redirect
+      - "traefik.http.routers.laravel-http.rule=Host(`nova.realpayglobal.com`)"
+      - "traefik.http.routers.laravel-http.entrypoints=web"
+      - "traefik.http.routers.laravel-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+    networks:
+      - web
+
+  # ------------------------------
+  # MySQL Database
+  # ------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: medicals_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: nova123
+      MYSQL_DATABASE: medicals
+      MYSQL_USER: pauladm
+      MYSQL_PASSWORD: pauladm
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - web
+
+  # ------------------------------
+  # Redis Cache
+  # ------------------------------
+  redis:
+    image: redis:alpine
+    container_name: redis_cache
+    volumes:
+      - redis_data:/data
+    networks:
+      - web
+
+volumes:
+  mysql_data:
+  redis_data:
+  letsencrypt:
+
+networks:
+  web:
